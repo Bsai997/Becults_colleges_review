@@ -48,7 +48,7 @@ export default function HomePage() {
 
       {/* Top 10 Colleges Section */}
       <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
-        {/* <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Top 10 Colleges</h2> */}
+        {/*<h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Top 10 Colleges</h2> */}
 
         {isLoading ? (
           <div className="flex justify-center items-center h-64">
