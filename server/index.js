@@ -1,6 +1,7 @@
 import express from 'express';
 import cors from 'cors';
 import dotenv from 'dotenv';
+import compression from 'compression';
 import { createClient } from '@supabase/supabase-js';
 import ws from 'ws';
 import collegesRoutes from './routes/colleges.js';
@@ -10,9 +11,23 @@ dotenv.config();
 
 const app = express();
 
-// Middleware
-app.use(cors());
+// Middleware - Add compression for faster responses
+app.use(compression());
+app.use(cors({
+  origin: process.env.FRONTEND_URL || '*',
+  credentials: true
+}));
 app.use(express.json());
+
+// Cache middleware for GET requests
+const cacheMiddleware = (req, res, next) => {
+  if (req.method === 'GET') {
+    res.set('Cache-Control', 'public, max-age=300');
+  }
+  next();
+};
+
+app.use(cacheMiddleware);
 
 // Initialize Supabase client with WebSocket support for Node.js 20
 export const supabase = createClient(

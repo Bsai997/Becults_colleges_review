@@ -1,6 +1,7 @@
 import { useNavigate } from 'react-router-dom';
+import { useCallback, memo } from 'react';
 
-export default function CollegeCard({
+function CollegeCard({
   rank,
   id,
   name,
@@ -9,6 +10,14 @@ export default function CollegeCard({
   total_reviews
 }) {
   const navigate = useNavigate();
+
+  const handleAddReview = useCallback(() => {
+    navigate(`/add-review/${id}`);
+  }, [id, navigate]);
+
+  const handleOpenReview = useCallback(() => {
+    navigate(`/reviews/${id}`);
+  }, [id, navigate]);
 
   const getRankBadgeColor = () => {
     switch (rank) {
@@ -85,7 +94,7 @@ export default function CollegeCard({
       {/* Buttons */}
       <div className="flex gap-2 flex-shrink-0 w-full md:w-auto">
         <button
-          onClick={() => navigate(`/add-review/${id}`)}
+          onClick={handleAddReview}
           className="flex-1 md:flex-none px-3 md:px-6 py-2 border-2 border-becults-green text-becults-green rounded-lg font-medium text-sm md:text-base hover:bg-becults-green hover:text-white transition-colors flex items-center justify-center gap-1 md:gap-2"
         >
           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -95,7 +104,7 @@ export default function CollegeCard({
           <span className="md:hidden text-xs">Add review</span>
         </button>
         <button
-          onClick={() => navigate(`/reviews/${id}`)}
+          onClick={handleOpenReview}
           className="flex-1 md:flex-none px-3 md:px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-medium text-sm md:text-base hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1 md:gap-2"
         >
           <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
@@ -109,3 +118,5 @@ export default function CollegeCard({
     </div>
   );
 }
+
+export default memo(CollegeCard);

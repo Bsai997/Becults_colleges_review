@@ -41,12 +41,17 @@ router.get('/reviews/:collegeId', async (req, res) => {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
-    res.json({
+    const responseData = {
       reviews: data,
       total_count: count,
       page: pageNum,
       total_pages: totalPages
-    });
+    };
+
+    // Add cache headers
+    res.set('Cache-Control', 'public, max-age=60');
+    res.set('ETag', `"reviews-${collegeId}-${pageNum}"`);
+    res.json(responseData);
   } catch (error) {
     console.error('Error fetching reviews:', error);
     res.status(500).json({ error: error.message });

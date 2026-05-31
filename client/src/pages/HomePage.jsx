@@ -2,6 +2,7 @@ import { useState, useEffect } from 'react';
 import api from '../api/axios';
 import SearchBar from '../components/SearchBar';
 import CollegeCard from '../components/CollegeCard';
+import SkeletonLoader from '../components/SkeletonLoader';
 
 export default function HomePage() {
   const [colleges, setColleges] = useState([]);
@@ -48,12 +49,10 @@ export default function HomePage() {
 
       {/* Top 10 Colleges Section */}
       <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
-        {/*<h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Top 10 Colleges</h2> */}
+        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Top 10 Colleges</h2>
 
         {isLoading ? (
-          <div className="flex justify-center items-center h-64">
-            <div className="animate-spin h-12 w-12 border-4 border-becults-green border-t-transparent rounded-full"></div>
-          </div>
+          <SkeletonLoader />
         ) : error ? (
           <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
             {error}
