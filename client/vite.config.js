@@ -11,8 +11,7 @@ export default defineConfig({
     rollupOptions: {
       output: {
         manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom', 'axios'],
-          'ui': ['lucide-react']
+          'vendor': ['react', 'react-dom', 'react-router-dom', 'axios']
         }
       }
     },
