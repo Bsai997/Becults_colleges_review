@@ -8,13 +8,6 @@ export default defineConfig({
     open: true
   },
   build: {
-    rollupOptions: {
-      output: {
-        manualChunks: {
-          'vendor': ['react', 'react-dom', 'react-router-dom', 'axios']
-        }
-      }
-    },
     minify: 'terser',
     terserOptions: {
       compress: {
