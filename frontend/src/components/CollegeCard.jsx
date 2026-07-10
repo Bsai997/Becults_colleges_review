@@ -59,61 +59,58 @@ function CollegeCard({
   };
 
   return (
-    <div className="bg-white rounded-lg shadow-md p-3 md:p-5 mb-4 flex flex-col md:flex-row md:items-center md:justify-between hover:shadow-lg transition-shadow border border-gray-100 gap-3">
-      <div className="flex items-center gap-3 flex-1 min-w-0">
-        {/* Rank Badge */}
-        <div
-          className={`${getRankBadgeColor()} text-white font-bold text-lg w-10 h-10 rounded-full flex items-center justify-center flex-shrink-0`}
-        >
-          {rank}
-        </div>
+    <div className="rounded-[26px] border border-slate-200 bg-white p-4 shadow-[0_10px_24px_rgba(15,23,42,0.08)] transition-transform hover:-translate-y-0.5 hover:shadow-[0_18px_32px_rgba(15,23,42,0.12)] md:p-5">
+      <div className="flex flex-col gap-4 md:flex-row md:items-center md:gap-5">
+        <div className="flex items-start gap-4 flex-1 min-w-0">
+          <div className="flex h-12 w-12 flex-shrink-0 items-center justify-center rounded-full bg-slate-200 text-sm font-bold text-slate-500">
+            {rank}
+          </div>
 
-        {/* College Info */}
-        <div className="flex-1 min-w-0">
-          <h3 className="font-semibold text-gray-900 text-base md:text-lg truncate">{name}</h3>
-          <div className="flex items-center gap-1 text-gray-600">
-            <svg className="w-4 h-4 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-              <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" />
-            </svg>
-            <p className="text-xs md:text-sm truncate">{location}</p>
+          <div className="min-w-0 flex-1">
+            <h3 className="truncate text-[1.05rem] font-semibold text-slate-900 md:text-[1.15rem]">{name}</h3>
+            <div className="mt-1 flex items-center gap-1 text-sm text-slate-600">
+              <svg className="h-4 w-4 flex-shrink-0 text-slate-500" fill="currentColor" viewBox="0 0 20 20">
+                <path fillRule="evenodd" d="M5.05 4.05a7 7 0 119.9 9.9L10 18.9l-4.95-4.95a7 7 0 010-9.9zM10 11a2 2 0 100-4 2 2 0 000 4z" />
+              </svg>
+              <span className="truncate">{location}</span>
+            </div>
+
+            <div className="mt-3 flex flex-wrap gap-1.5">
+              {['College life', 'Placements', 'Faculty', 'Events', 'Hostel'].map((tag) => (
+                <span
+                  key={tag}
+                  className="rounded-full border border-[#f4c9b0] bg-[#fff7f2] px-2.5 py-1 text-[10px] font-medium text-[#ef6c20]"
+                >
+                  {tag}
+                </span>
+              ))}
+            </div>
+
+            <p className="mt-3 text-xs text-slate-500">{total_reviews} Reviews</p>
           </div>
         </div>
-      </div>
 
-      {/* Rating Section */}
-      <div className="flex items-center gap-2 md:gap-3 md:mx-4 flex-shrink-0">
-        <div className="flex flex-col items-center">
-          <div className="flex gap-1 items-center">
-            <span className="font-bold text-gray-900 text-sm md:text-base">{average_rating}</span>
+        <div className="flex flex-col gap-3 md:w-[320px]">
+          {/* <div className="flex items-center justify-end gap-2 md:gap-3">
+            <span className="font-semibold text-slate-900 text-base md:text-lg">{average_rating}</span>
             {renderStars(average_rating)}
-          </div>
-          <p className="text-xs text-gray-500">· {total_reviews} reviews</p>
-        </div>
-      </div>
+          </div> */}
 
-      {/* Buttons */}
-      <div className="flex gap-2 flex-shrink-0 w-full md:w-auto">
-        <button
-          onClick={handleAddReview}
-          className="flex-1 md:flex-none px-3 md:px-6 py-2 border-2 border-becults-green text-becults-green rounded-lg font-medium text-sm md:text-base hover:bg-becults-green hover:text-white transition-colors flex items-center justify-center gap-1 md:gap-2"
-        >
-          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M11 5H6a2 2 0 00-2 2v11a2 2 0 002 2h11a2 2 0 002-2v-5m-1.414-9.414a2 2 0 112.828 2.828L11.828 15H9v-2.828l8.586-8.586z" />
-          </svg>
-          <span className="hidden md:inline">Add review</span>
-          <span className="md:hidden text-xs">Add review</span>
-        </button>
-        <button
-          onClick={handleOpenReview}
-          className="flex-1 md:flex-none px-3 md:px-6 py-2 border-2 border-gray-300 text-gray-700 rounded-lg font-medium text-sm md:text-base hover:border-gray-400 hover:bg-gray-50 transition-colors flex items-center justify-center gap-1 md:gap-2"
-        >
-          <svg className="w-4 h-4 md:w-5 md:h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M15 12a3 3 0 11-6 0 3 3 0 016 0z" />
-            <path strokeLinecap="round" strokeLinejoin="round" strokeWidth={2} d="M2.458 12C3.732 7.943 7.523 5 12 5c4.478 0 8.268 2.943 9.542 7-1.274 4.057-5.064 7-9.542 7-4.477 0-8.268-2.943-9.542-7z" />
-          </svg>
-          <span className="hidden md:inline">Open Review</span>
-          <span className="md:hidden text-xs">Open Review</span>
-        </button>
+          <div className="grid grid-cols-2 gap-3">
+            <button
+              onClick={handleAddReview}
+              className="inline-flex items-center justify-center gap-2 rounded-xl border border-[#f0b394] bg-white px-4 py-3 text-sm font-semibold text-[#ef6c20] transition-colors hover:bg-[#fff3eb]"
+            >
+              Add Review
+            </button>
+            <button
+              onClick={handleOpenReview}
+              className="inline-flex items-center justify-center gap-2 rounded-xl bg-[#2067a3] px-4 py-3 text-sm font-semibold text-white transition-colors hover:bg-[#195784]"
+            >
+              Open Review
+            </button>
+          </div>
+        </div>
       </div>
     </div>
   );

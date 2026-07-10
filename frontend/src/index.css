@@ -7,5 +7,13 @@
 }
 
 body {
-  @apply font-sans bg-gray-50;
+  @apply font-sans bg-[#eaf3fb] text-slate-900 antialiased;
+  min-height: 100vh;
+  background-image:
+    radial-gradient(circle at top left, rgba(255, 255, 255, 0.9), transparent 35%),
+    radial-gradient(circle at top right, rgba(255, 255, 255, 0.65), transparent 28%);
+}
+
+#root {
+  min-height: 100vh;
 }

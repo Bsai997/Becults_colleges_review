@@ -28,41 +28,52 @@ export default function HomePage() {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Hero Section */}
-      <div className="bg-becults-dark text-white py-8 md:py-12 px-4">
-        <div className="max-w-4xl mx-auto text-center">
-          <h1 className="text-4xl md:text-6xl font-bold mb-2">BECULTS</h1>
-          <h2 className="text-xl md:text-3xl font-semibold mb-3 text-gray-200">College Reviews Platform</h2>
-          <p className="text-sm md:text-lg text-gray-300">
-            Real reviews by real B.Tech students. Find the right college.
+    <div className="min-h-screen bg-[#eaf3fb] text-slate-900">
+      <div className="relative overflow-hidden bg-[linear-gradient(180deg,#f4f8fd_0%,#eaf3fb_100%)] px-4 pt-10 pb-6 md:pt-14 md:pb-8">
+        <div className="absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top_left,rgba(0,102,204,0.14),transparent_45%),radial-gradient(circle_at_top_right,rgba(243,116,32,0.18),transparent_35%)]" />
+        <div className="relative mx-auto flex max-w-2xl flex-col items-center text-center">
+          <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 shadow-sm backdrop-blur">
+            BECULTS
+          </div>
+          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-6xl">
+            College Reviews
+            <span className="block text-slate-800">by <span className="text-[#ef6c20]">College Students</span></span>
+          </h1>
+          <p className="mt-4 max-w-xl text-sm text-slate-600 md:text-base">
+            Search, compare, and open real student reviews in one place.
           </p>
         </div>
       </div>
 
-      {/* Search Bar Section */}
-      <div className="bg-white border-b border-gray-200 px-4 py-6">
-        <div className="max-w-4xl mx-auto">
+      <div className="px-4 pb-10">
+        <div className="mx-auto max-w-4xl rounded-[28px] border border-sky-200 bg-white/95 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur md:p-5">
           <SearchBar />
         </div>
       </div>
 
-      {/* Top 10 Colleges Section */}
-      <div className="max-w-4xl mx-auto px-4 py-12 md:py-16">
-        <h2 className="text-2xl md:text-3xl font-bold text-gray-800 mb-8">Top 10 Colleges</h2>
+      <div className="mx-auto max-w-4xl px-4 pb-12 md:pb-16">
+        <div className="mb-5 flex items-end justify-between gap-3">
+          <div>
+            <h2 className="text-xl font-bold text-slate-900 md:text-2xl">Top Colleges</h2>
+            <p className="mt-1 text-sm text-slate-600">The most reviewed colleges on the platform.</p>
+          </div>
+          <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+            {colleges.length} listed
+          </div>
+        </div>
 
         {isLoading ? (
           <SkeletonLoader />
         ) : error ? (
-          <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-lg">
+          <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
             {error}
           </div>
         ) : colleges.length === 0 ? (
-          <div className="bg-blue-100 border border-blue-400 text-blue-700 px-4 py-3 rounded-lg">
+          <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-700 shadow-sm">
             No colleges found. Be the first to add a review!
           </div>
         ) : (
-          <div>
+          <div className="space-y-4">
             {colleges.map((college, index) => (
               <CollegeCard
                 key={college.id}
