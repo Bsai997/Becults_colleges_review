@@ -8,6 +8,8 @@ router.get('/reviews/:collegeId', async (req, res) => {
   try {
     const { collegeId } = req.params;
     const { branch, year, type, page = 1 } = req.query;
+    console.log('GET /reviews/:collegeId - collegeId:', collegeId, 'page:', page);
+    
     const pageNum = parseInt(page) || 1;
     const limit = 10;
     const offset = (pageNum - 1) * limit;
@@ -37,7 +39,10 @@ router.get('/reviews/:collegeId', async (req, res) => {
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase error fetching reviews:', error);
+      throw error;
+    }
 
     const totalPages = Math.ceil((count || 0) / limit);
 
@@ -61,6 +66,8 @@ router.get('/reviews/:collegeId', async (req, res) => {
 // POST /api/reviews - Create a new review
 router.post('/reviews', async (req, res) => {
   try {
+    console.log('POST /reviews - Received body:', req.body);
+    
     const {
       college_id,
       name,
@@ -135,6 +142,13 @@ router.post('/reviews', async (req, res) => {
 
     const overallRating = parseFloat((ratingSum / ratingCount).toFixed(1));
 
+    console.log('Attempting to insert review with:', {
+      college_id,
+      overall_rating: overallRating,
+      pros_count: pros?.length,
+      cons_count: cons?.length
+    });
+
     // Insert review
     const { data, error } = await supabase
       .from('reviews')
@@ -167,12 +181,19 @@ router.post('/reviews', async (req, res) => {
       .select()
       .single();
 
-    if (error) throw error;
+    if (error) {
+      console.error('Supabase insert error:', error);
+      throw error;
+    }
 
+    console.log('Review created successfully:', data?.id);
     res.status(201).json(data);
   } catch (error) {
-    console.error('Error creating review:', error);
-    res.status(500).json({ error: error.message });
+    console.error('Error creating review:', error.message, error.details || '');
+    res.status(500).json({ 
+      error: error.message,
+      details: error.details || error.hint || 'Unknown error'
+    });
   }
 });
 

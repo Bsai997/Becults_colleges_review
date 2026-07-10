@@ -3,50 +3,17 @@ import { supabase } from '../index.js';
 
 const router = express.Router();
 
-// GET /api/colleges/top10 - Get top 10 colleges by average rating with optimized query
+// GET /api/colleges/top10 - Get top 10 colleges
 router.get('/colleges/top10', async (req, res) => {
   try {
-    // Use database aggregation instead of fetching all data
-    const { data: collegesWithStats, error } = await supabase
+    const { data, error } = await supabase
       .from('colleges')
-      .select(`
-        id,
-        name,
-        location,
-        affiliation,
-        reviews (overall_rating)
-      `);
+      .select('id, instcode, name, location, affiliation, created_at')
+      .limit(10);
 
     if (error) throw error;
 
-    // Map and calculate stats
-    const collegesWithScores = collegesWithStats.map(college => {
-      const reviews = college.reviews || [];
-      const totalRating = reviews.reduce((sum, review) => sum + review.overall_rating, 0);
-      const count = reviews.length;
-      
-      return {
-        id: college.id,
-        name: college.name,
-        location: college.location,
-        affiliation: college.affiliation,
-        average_rating: count > 0 ? parseFloat((totalRating / count).toFixed(1)) : 0,
-        total_reviews: count
-      };
-    });
-
-    // Sort and get top 10
-    const top10 = collegesWithScores
-      .sort((a, b) => {
-        if (b.average_rating !== a.average_rating) {
-          return b.average_rating - a.average_rating;
-        }
-        return a.name.localeCompare(b.name);
-      })
-      .slice(0, 10);
-
-    res.set('ETag', `"top10-${Date.now()}"`);
-    res.json(top10);
+    res.json(data);
   } catch (error) {
     console.error('Error fetching top 10 colleges:', error);
     res.status(500).json({ error: error.message });
@@ -64,7 +31,7 @@ router.get('/colleges/search', async (req, res) => {
 
     const { data, error } = await supabase
       .from('colleges')
-      .select('id, name, location')
+      .select('id, instcode, name, location, affiliation, created_at')
       .ilike('name', `%${q}%`)
       .limit(5);
 
@@ -77,37 +44,21 @@ router.get('/colleges/search', async (req, res) => {
   }
 });
 
-// GET /api/colleges/:collegeId - Get single college details
-router.get('/colleges/:collegeId', async (req, res) => {
-  try {
-    const { collegeId } = req.params;
-
-    const { data, error } = await supabase
-      .from('colleges')
-      .select('*')
-      .eq('id', collegeId)
-      .single();
-
-    if (error) throw error;
-
-    res.json(data);
-  } catch (error) {
-    console.error('Error fetching college:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
-
-// GET /api/colleges/:collegeId/stats - Get college statistics
+// GET /api/colleges/:collegeId/stats - Get college statistics (must be before :collegeId route)
 router.get('/colleges/:collegeId/stats', async (req, res) => {
   try {
     const { collegeId } = req.params;
+    console.log('Fetching stats for collegeId:', collegeId);
 
     const { data, error } = await supabase
       .from('reviews')
-      .select('*')
+      .select('faculty_rating, placements_rating, infrastructure_rating, is_hosteller, hostel_rating')
       .eq('college_id', collegeId);
 
-    if (error) throw error;
+    if (error) {
+      console.error('Error querying reviews:', error);
+      throw error;
+    }
 
     if (data.length === 0) {
       return res.json({
@@ -162,6 +113,26 @@ router.get('/colleges/:collegeId/stats', async (req, res) => {
     res.json(stats);
   } catch (error) {
     console.error('Error fetching college stats:', error);
+    res.status(500).json({ error: error.message });
+  }
+});
+
+// GET /api/colleges/:collegeId - Get single college details
+router.get('/colleges/:collegeId', async (req, res) => {
+  try {
+    const { collegeId } = req.params;
+
+    const { data, error } = await supabase
+      .from('colleges')
+      .select('id, instcode, name, location, affiliation, created_at')
+      .eq('id', collegeId)
+      .single();
+
+    if (error) throw error;
+
+    res.json(data);
+  } catch (error) {
+    console.error('Error fetching college:', error);
     res.status(500).json({ error: error.message });
   }
 });

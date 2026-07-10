@@ -147,7 +147,8 @@ export default function AddReviewPage() {
       }, 2500);
     } catch (err) {
       console.error('Error submitting review:', err);
-      setError(err.response?.data?.error || 'Failed to submit review. Please try again.');
+      const errorMessage = err.response?.data?.error || err.response?.data?.details || err.message || 'Failed to submit review. Please try again.';
+      setError(errorMessage);
     } finally {
       setIsSubmitting(false);
     }
