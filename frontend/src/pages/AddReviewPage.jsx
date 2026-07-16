@@ -1,7 +1,45 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
+import { ChevronDown } from 'lucide-react';
 import api from '../api/axios';
-import StarRating from '../components/StarRating';
+
+// Questions for each rating field
+const FIELD_QUESTIONS = {
+  faculty: [
+    'Do teachers explain concepts clearly or mostly read from slides?',
+    'Are faculty supportive of projects, hackathons, research, or startups?',
+    'Which department has the strongest faculty, and why?',
+    'What should a new student know about the teaching style here?'
+  ],
+  placements: [
+    'What is the average salary offered during placements?',
+    'What types of companies visit for recruitment?',
+    'How is the placement process conducted?',
+    'What skills do recruiters look for in candidates?',
+    'Are there opportunities for higher studies or MBA placements?'
+  ],
+  techEvents: [
+    'What technical workshops and seminars are organized?',
+    'Are there hackathons and coding competitions?',
+    'How supportive is the college for tech club activities?',
+    'What opportunities exist for tech conferences and competitions?',
+    'Are there online tech events and certifications encouraged?'
+  ],
+  infrastructure: [
+    'What is the condition of classroom buildings and labs?',
+    'Are there modern sports facilities and recreational areas?',
+    'How is the library and WiFi connectivity?',
+    'Are there separate facilities for boys and girls?',
+    'How is the campus cleanliness and maintenance?'
+  ],
+  collegeLife: [
+    'What are the opportunities for cultural and sports activities?',
+    'How active are the clubs and societies on campus?',
+    'What is the social life and friend-making potential?',
+    'Are there regular fests and events throughout the year?',
+    'How supportive is the college for student initiatives?'
+  ]
+};
 
 export default function AddReviewPage() {
   const { collegeId } = useParams();
@@ -11,25 +49,34 @@ export default function AddReviewPage() {
   const [error, setError] = useState(null);
   const [successMessage, setSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [expandedBlocks, setExpandedBlocks] = useState({
+    honestReview: false
+  });
+  const [expandedQuestions, setExpandedQuestions] = useState({});
+
+  // Toggle expandable blocks
+  const toggleBlock = (blockName) => {
+    setExpandedBlocks(prev => ({
+      ...prev,
+      [blockName]: !prev[blockName]
+    }));
+  };
+
+  // Toggle question sections
+  const toggleQuestions = (field) => {
+    setExpandedQuestions(prev => ({
+      ...prev,
+      [field]: !prev[field]
+    }));
+  };
 
   // Form state
   const [formData, setFormData] = useState({
-    name: '',
-    college_id_number: '',
-    branch: '',
-    year: '',
-    batch: '',
-    is_hosteller: null,
-    college_hostel_available: null,
-    outside_hostel: null,
-    faculty_rating: 0,
-    faculty_reason: '',
-    placements_rating: 0,
-    placements_reason: '',
-    infrastructure_rating: 0,
-    infrastructure_reason: '',
-    hostel_rating: 0,
-    hostel_reason: '',
+    faculty: '',
+    placements: '',
+    techEvents: '',
+    infrastructure: '',
+    collegeLife: '',
     pros: [''],
     cons: [''],
     advice_to_juniors: '',
@@ -37,10 +84,6 @@ export default function AddReviewPage() {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
-
-  useEffect(() => {
-    fetchCollege();
-  }, [collegeId]);
 
   const fetchCollege = async () => {
     try {
@@ -55,6 +98,10 @@ export default function AddReviewPage() {
       setIsLoading(false);
     }
   };
+
+  useEffect(() => {
+    fetchCollege();
+  }, [collegeId]);
 
   const handleInputChange = (field, value) => {
     setFormData(prev => ({
@@ -87,18 +134,16 @@ export default function AddReviewPage() {
   const validateForm = () => {
     const errors = {};
 
-    if (!formData.name.trim()) errors.name = 'Name is required';
-    if (!formData.college_id_number.trim()) errors.college_id_number = 'College ID is required';
-    if (!formData.branch) errors.branch = 'Branch is required';
-    if (!formData.year) errors.year = 'Year is required';
-    if (!formData.batch.trim()) errors.batch = 'Batch is required';
-    if (formData.is_hosteller === null) errors.is_hosteller = 'Please select Hosteller or Day Scholar';
-    if (formData.faculty_rating === 0) errors.faculty_rating = 'Faculty rating is required';
-    if (formData.placements_rating === 0) errors.placements_rating = 'Placements rating is required';
-    if (formData.infrastructure_rating === 0) errors.infrastructure_rating = 'Infrastructure rating is required';
-    if (formData.is_hosteller && formData.hostel_rating === 0) errors.hostel_rating = 'Hostel rating is required';
-    if (formData.pros.filter(p => p.trim()).length === 0) errors.pros = 'At least one pro is required';
-    if (formData.cons.filter(c => c.trim()).length === 0) errors.cons = 'At least one con is required';
+    // Block 1 validation
+    if (!formData.faculty.trim()) errors.faculty = 'Faculty review is required';
+    if (!formData.placements.trim()) errors.placements = 'Placements review is required';
+    if (!formData.techEvents.trim()) errors.techEvents = 'Tech and Non Tech Events review is required';
+    if (!formData.infrastructure.trim()) errors.infrastructure = 'Infrastructure & Sports review is required';
+    if (!formData.collegeLife.trim()) errors.collegeLife = 'College life review is required';
+
+    // Block 3 validation
+    if (formData.pros.filter(p => p.trim()).length === 0) errors.pros = 'At least one positive is required';
+    if (formData.cons.filter(c => c.trim()).length === 0) errors.cons = 'At least one negative is required';
     if (!formData.overall_about_college.trim()) errors.overall_about_college = 'Overall about college is required';
 
     setValidationErrors(errors);
@@ -117,28 +162,18 @@ export default function AddReviewPage() {
       setIsSubmitting(true);
       const submitData = {
         college_id: collegeId,
-        name: formData.name,
-        college_id_number: formData.college_id_number,
-        branch: formData.branch,
-        year: parseInt(formData.year),
-        batch: formData.batch,
-        is_hosteller: formData.is_hosteller,
-        college_hostel_available: formData.is_hosteller ? formData.college_hostel_available : null,
-        outside_hostel: formData.is_hosteller ? formData.outside_hostel : null,
-        faculty_rating: formData.faculty_rating,
-        faculty_reason: formData.faculty_reason,
-        placements_rating: formData.placements_rating,
-        placements_reason: formData.placements_reason,
-        infrastructure_rating: formData.infrastructure_rating,
-        infrastructure_reason: formData.infrastructure_reason,
-        hostel_rating: formData.is_hosteller ? formData.hostel_rating : null,
-        hostel_reason: formData.is_hosteller ? formData.hostel_reason : null,
+        faculty: formData.faculty,
+        placements: formData.placements,
+        tech_events: formData.techEvents,
+        infrastructure: formData.infrastructure,
+        college_life: formData.collegeLife,
         pros: formData.pros.filter(p => p.trim()),
         cons: formData.cons.filter(c => c.trim()),
         advice_to_juniors: formData.advice_to_juniors,
         overall_about_college: formData.overall_about_college
       };
 
+      // TODO: Update this endpoint once backend is ready
       await api.post('/reviews', submitData);
       setSuccessMessage('Thanks for your honest feedback!');
 
@@ -173,7 +208,7 @@ export default function AddReviewPage() {
   }
 
   return (
-    <div className="min-h-screen bg-gray-50 py-8 px-4">
+    <div className="min-h-screen bg-[linear-gradient(180deg,#f4f8fd_0%,#eaf3fb_100%)] py-8 px-4">
       {/* Success Modal Overlay */}
       {successMessage && (
         <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
@@ -190,7 +225,7 @@ export default function AddReviewPage() {
         </div>
       )}
 
-      <div className="max-w-2xl mx-auto">
+      <div className="max-w-3xl mx-auto">
         {/* Error Banner */}
         {error && (
           <div className="mb-6 bg-red-100 border-2 border-red-500 text-red-700 px-4 py-3 rounded-lg">
@@ -198,401 +233,272 @@ export default function AddReviewPage() {
           </div>
         )}
 
-        {/* College Header */}
-        <h1 className="text-3xl font-bold text-gray-800 mb-2">{college.name}</h1>
-        <p className="text-gray-600 mb-6">{college.location}</p>
-
-        {/* Quote Banner */}
-        <div className="bg-green-50 border-l-4 border-becults-green px-4 py-4 mb-8">
-          <p className="text-gray-700 italic">
-            "Please write reviews honestly — it will be useful for many future engineers to choose the correct college."
-          </p>
+        {/* Header */}
+        <div className="mb-8">
+          <h1 className="text-3xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
+            Say. <span className="text-[#ef6c20]">What no one told you</span>
+            <br /> before College Joining
+          </h1>
         </div>
 
-        {/* Form */}
-        <form onSubmit={handleSubmit} className="bg-white rounded-lg shadow-md p-6 md:p-8">
-          {/* Section 1: Student Info */}
-          <div className="mb-8">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Student Information</h2>
+        {/* College Info */}
+        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
+          <h2 className="text-2xl font-bold text-gray-800 mb-2">{college.name}</h2>
+          <p className="text-gray-600">{college.location}</p>
+        </div>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Name <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="Your full name"
-                value={formData.name}
-                onChange={(e) => handleInputChange('name', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green ${
-                  validationErrors.name ? 'border-red-500' : 'border-gray-300'
-                }`}
+        {/* Form - Block 1: Give Your Honest Review */}
+        <form onSubmit={handleSubmit} className="space-y-4">
+          {/* BLOCK 1: Give Your Honest Review */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            {/* Block Header - Expandable */}
+            <button
+              type="button"
+              onClick={() => toggleBlock('honestReview')}
+              className="w-full flex items-center justify-between bg-white px-6 py-4 hover:bg-gray-50 transition-colors"
+            >
+              <h3 className="text-lg font-bold text-gray-900">Give your Honest Review</h3>
+              <ChevronDown
+                size={24}
+                className={`text-gray-600 transition-transform ${expandedBlocks.honestReview ? 'rotate-180' : ''}`}
               />
-              {validationErrors.name && <p className="text-red-500 text-sm mt-1">{validationErrors.name}</p>}
-            </div>
+            </button>
 
-            <div className="mb-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                College ID <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 21EG1A0501"
-                value={formData.college_id_number}
-                onChange={(e) => handleInputChange('college_id_number', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green ${
-                  validationErrors.college_id_number ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {validationErrors.college_id_number && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.college_id_number}</p>
-              )}
-            </div>
-
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Branch <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.branch}
-                  onChange={(e) => handleInputChange('branch', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green ${
-                    validationErrors.branch ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">Select Branch</option>
-                  <option value="CSE">CSE</option>
-                  <option value="ECE">ECE</option>
-                  <option value="MECH">MECH</option>
-                  <option value="CIVIL">CIVIL</option>
-                  <option value="IT">IT</option>
-                  <option value="EEE">EEE</option>
-                </select>
-                {validationErrors.branch && <p className="text-red-500 text-sm mt-1">{validationErrors.branch}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-700 mb-2">
-                  Year <span className="text-red-500">*</span>
-                </label>
-                <select
-                  value={formData.year}
-                  onChange={(e) => handleInputChange('year', e.target.value)}
-                  className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green ${
-                    validationErrors.year ? 'border-red-500' : 'border-gray-300'
-                  }`}
-                >
-                  <option value="">Select Year</option>
-                  <option value="1">1st year</option>
-                  <option value="2">2nd year</option>
-                  <option value="3">3rd year</option>
-                  <option value="4">4th year</option>
-                </select>
-                {validationErrors.year && <p className="text-red-500 text-sm mt-1">{validationErrors.year}</p>}
-              </div>
-            </div>
-
-            <div className="mt-4">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Batch <span className="text-red-500">*</span>
-              </label>
-              <input
-                type="text"
-                placeholder="e.g. 2022-2026"
-                value={formData.batch}
-                onChange={(e) => handleInputChange('batch', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green ${
-                  validationErrors.batch ? 'border-red-500' : 'border-gray-300'
-                }`}
-              />
-              {validationErrors.batch && <p className="text-red-500 text-sm mt-1">{validationErrors.batch}</p>}
-            </div>
-          </div>
-
-          {/* Section 2: Ratings */}
-          <div className="mb-8 pb-8 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Ratings</h2>
-
-            <div>
-              <StarRating
-                label="Faculty Rating"
-                required
-                value={formData.faculty_rating}
-                onChange={(value) => handleInputChange('faculty_rating', value)}
-              />
-              {validationErrors.faculty_rating && (
-                <p className="text-red-500 text-sm mb-4">{validationErrors.faculty_rating}</p>
-              )}
-              <div className="mb-6">
-                <textarea
-                  placeholder="Why did you rate faculty this way? (optional)"
-                  value={formData.faculty_reason}
-                  onChange={(e) => handleInputChange('faculty_reason', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                  rows="3"
-                />
-              </div>
-            </div>
-
-            <div>
-              <StarRating
-                label="Placements Rating"
-                required
-                value={formData.placements_rating}
-                onChange={(value) => handleInputChange('placements_rating', value)}
-              />
-              {validationErrors.placements_rating && (
-                <p className="text-red-500 text-sm mb-4">{validationErrors.placements_rating}</p>
-              )}
-              <div className="mb-6">
-                <textarea
-                  placeholder="Why did you rate placements this way? (optional)"
-                  value={formData.placements_reason}
-                  onChange={(e) => handleInputChange('placements_reason', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                  rows="3"
-                />
-              </div>
-            </div>
-
-            <div>
-              <StarRating
-                label="Infrastructure Rating"
-                required
-                value={formData.infrastructure_rating}
-                onChange={(value) => handleInputChange('infrastructure_rating', value)}
-              />
-              {validationErrors.infrastructure_rating && (
-                <p className="text-red-500 text-sm mb-4">{validationErrors.infrastructure_rating}</p>
-              )}
-              <div>
-                <textarea
-                  placeholder="Why did you rate infrastructure this way? (optional)"
-                  value={formData.infrastructure_reason}
-                  onChange={(e) => handleInputChange('infrastructure_reason', e.target.value)}
-                  className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                  rows="3"
-                />
-              </div>
-            </div>
-          </div>
-
-          {/* Section 3: Accommodation */}
-          <div className="mb-8 pb-8 border-b border-gray-200">
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Accommodation</h2>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Are you a Hosteller or Day Scholar? <span className="text-red-500">*</span>
-              </label>
-              <div className="flex gap-4">
-                <button
-                  type="button"
-                  onClick={() => handleInputChange('is_hosteller', true)}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    formData.is_hosteller === true
-                      ? 'bg-becults-green text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  Hosteller
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleInputChange('is_hosteller', false)}
-                  className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                    formData.is_hosteller === false
-                      ? 'bg-becults-green text-white'
-                      : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                  }`}
-                >
-                  Day Scholar
-                </button>
-              </div>
-              {validationErrors.is_hosteller && (
-                <p className="text-red-500 text-sm mt-2">{validationErrors.is_hosteller}</p>
-              )}
-            </div>
-
-            {formData.is_hosteller === true && (
-              <div>
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    College hostel facilities available?
-                  </label>
-                  <div className="flex gap-4">
+            {/* Block Content - Expandable Ratings */}
+            {expandedBlocks.honestReview && (
+              <div className="border-t border-gray-200 p-6 space-y-6 bg-white">
+                
+                {/* Faculty */}
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-800">Faculty <span className="text-red-500">*</span></label>
                     <button
                       type="button"
-                      onClick={() => handleInputChange('college_hostel_available', true)}
-                      className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                        formData.college_hostel_available === true
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                      onClick={() => toggleQuestions('faculty')}
+                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#1d1c1c] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                      title="View guiding questions"
                     >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('college_hostel_available', false)}
-                      className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                        formData.college_hostel_available === false
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      No
+                      <span>Q's</span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform ${expandedQuestions.faculty ? 'rotate-180' : ''}`}
+                      />
                     </button>
                   </div>
-                </div>
-
-                <div className="mb-6">
-                  <label className="block text-sm font-medium text-gray-700 mb-3">
-                    Staying in outside hostel?
-                  </label>
-                  <div className="flex gap-4">
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('outside_hostel', true)}
-                      className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                        formData.outside_hostel === true
-                          ? 'bg-green-500 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
+                  {expandedQuestions.faculty && (
+                    <div 
+                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      onClick={() => toggleQuestions('faculty')}
                     >
-                      Yes
-                    </button>
-                    <button
-                      type="button"
-                      onClick={() => handleInputChange('outside_hostel', false)}
-                      className={`px-6 py-2 rounded-lg font-medium transition-colors ${
-                        formData.outside_hostel === false
-                          ? 'bg-red-500 text-white'
-                          : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
-                      }`}
-                    >
-                      No
-                    </button>
-                  </div>
-                </div>
-
-                <div>
-                  <StarRating
-                    label="Hostel Rating"
-                    required
-                    value={formData.hostel_rating}
-                    onChange={(value) => handleInputChange('hostel_rating', value)}
-                  />
-                  {validationErrors.hostel_rating && (
-                    <p className="text-red-500 text-sm mb-4">{validationErrors.hostel_rating}</p>
+                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                        {FIELD_QUESTIONS.faculty.map((question, idx) => (
+                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex gap-2">
+                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                              <p className="text-gray-900">{question}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
                   )}
-                  <div className="mb-6">
-                    <textarea
-                      placeholder="Why did you rate hostel this way? (optional)"
-                      value={formData.hostel_reason}
-                      onChange={(e) => handleInputChange('hostel_reason', e.target.value)}
-                      className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                      rows="3"
-                    />
+                  <textarea
+                    placeholder="Tell everything about your faculty experience."
+                    value={formData.faculty}
+                    onChange={(e) => setFormData(prev => ({...prev, faculty: e.target.value}))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                      validationErrors.faculty ? 'border-black focus:ring-black' : 'border-gray-300 focus:ring-[#8b8989]'
+                    }`}
+                    rows="3"
+                  />
+                  {validationErrors.faculty && <p className="text-red-500 text-sm mt-1">{validationErrors.faculty}</p>}
+                </div>
+
+                {/* Placements */}
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-800">Placements <span className="text-red-500">*</span></label>
+                    <button
+                      type="button"
+                      onClick={() => toggleQuestions('placements')}
+                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                      title="View guiding questions"
+                    >
+                      <span>Q's</span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform ${expandedQuestions.placements ? 'rotate-180' : ''}`}
+                      />
+                    </button>
                   </div>
+                  {expandedQuestions.placements && (
+                    <div 
+                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      onClick={() => toggleQuestions('placements')}
+                    >
+                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                        {FIELD_QUESTIONS.placements.map((question, idx) => (
+                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex gap-2">
+                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                              <p className="text-gray-900">{question}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    placeholder="Tell the real placement story here."
+                    value={formData.placements}
+                    onChange={(e) => setFormData(prev => ({...prev, placements: e.target.value}))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                      validationErrors.placements ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                    }`}
+                    rows="3"
+                  />
+                  {validationErrors.placements && <p className="text-red-500 text-sm mt-1">{validationErrors.placements}</p>}
+                </div>
+
+                {/* Tech and Non Tech Events */}
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-800">Tech and Non Tech Events <span className="text-red-500">*</span></label>
+                    <button
+                      type="button"
+                      onClick={() => toggleQuestions('techEvents')}
+                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                      title="View guiding questions"
+                    >
+                      <span>Q's</span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform ${expandedQuestions.techEvents ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                  </div>
+                  {expandedQuestions.techEvents && (
+                    <div 
+                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      onClick={() => toggleQuestions('techEvents')}
+                    >
+                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                        {FIELD_QUESTIONS.techEvents.map((question, idx) => (
+                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex gap-2">
+                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                              <p className="text-gray-900">{question}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    placeholder="Share your event and club experience."
+                    value={formData.techEvents}
+                    onChange={(e) => setFormData(prev => ({...prev, techEvents: e.target.value}))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                      validationErrors.techEvents ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                    }`}
+                    rows="3"
+                  />
+                  {validationErrors.techEvents && <p className="text-red-500 text-sm mt-1">{validationErrors.techEvents}</p>}
+                </div>
+
+                {/* Infrastructure & Sports */}
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-800">Infrastructure & Sports <span className="text-red-500">*</span></label>
+                    <button
+                      type="button"
+                      onClick={() => toggleQuestions('infrastructure')}
+                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                      title="View guiding questions"
+                    >
+                      <span>Q's</span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform ${expandedQuestions.infrastructure ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                  </div>
+                  {expandedQuestions.infrastructure && (
+                    <div 
+                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      onClick={() => toggleQuestions('infrastructure')}
+                    >
+                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                        {FIELD_QUESTIONS.infrastructure.map((question, idx) => (
+                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex gap-2">
+                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                              <p className="text-gray-900">{question}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    placeholder="Tell everything about campus facilities."
+                    value={formData.infrastructure}
+                    onChange={(e) => setFormData(prev => ({...prev, infrastructure: e.target.value}))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                      validationErrors.infrastructure ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                    }`}
+                    rows="3"
+                  />
+                  {validationErrors.infrastructure && <p className="text-red-500 text-sm mt-1">{validationErrors.infrastructure}</p>}
+                </div>
+
+                {/* College life */}
+                <div className="relative">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-800">College life <span className="text-red-500">*</span></label>
+                    <button
+                      type="button"
+                      onClick={() => toggleQuestions('collegeLife')}
+                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                      title="View guiding questions"
+                    >
+                      <span>Q's</span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform ${expandedQuestions.collegeLife ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                  </div>
+                  {expandedQuestions.collegeLife && (
+                    <div 
+                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      onClick={() => toggleQuestions('collegeLife')}
+                    >
+                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                        {FIELD_QUESTIONS.collegeLife.map((question, idx) => (
+                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex gap-2">
+                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                              <p className="text-gray-900">{question}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    placeholder="Describe your complete college life experience."
+                    value={formData.collegeLife}
+                    onChange={(e) => setFormData(prev => ({...prev, collegeLife: e.target.value}))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                      validationErrors.collegeLife ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                    }`}
+                    rows="3"
+                  />
+                  {validationErrors.collegeLife && <p className="text-red-500 text-sm mt-1">{validationErrors.collegeLife}</p>}
                 </div>
               </div>
             )}
-          </div>
-
-          {/* Section 4: Written Review */}
-          <div>
-            <h2 className="text-2xl font-bold text-gray-800 mb-6">Written Review</h2>
-
-            <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Pros <span className="text-red-500">*</span>
-              </label>
-              {formData.pros.map((pro, index) => (
-                <div key={index} className="mb-2">
-                  <input
-                    type="text"
-                    placeholder={`Pro ${index + 1}`}
-                    value={pro}
-                    onChange={(e) => handleArrayChange('pros', index, e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                  />
-                </div>
-              ))}
-              {validationErrors.pros && <p className="text-red-500 text-sm mb-2">{validationErrors.pros}</p>}
-              <button
-                type="button"
-                onClick={() => addArrayItem('pros')}
-                className="mt-2 px-4 py-2 bg-becults-green text-white rounded-lg hover:bg-becults-dark transition-colors"
-              >
-                + Add another pro
-              </button>
-            </div>
-
-            <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-3">
-                Cons <span className="text-red-500">*</span>
-              </label>
-              {formData.cons.map((con, index) => (
-                <div key={index} className="mb-2">
-                  <input
-                    type="text"
-                    placeholder={`Con ${index + 1}`}
-                    value={con}
-                    onChange={(e) => handleArrayChange('cons', index, e.target.value)}
-                    className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                  />
-                </div>
-              ))}
-              {validationErrors.cons && <p className="text-red-500 text-sm mb-2">{validationErrors.cons}</p>}
-              <button
-                type="button"
-                onClick={() => addArrayItem('cons')}
-                className="mt-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors"
-              >
-                + Add another con
-              </button>
-            </div>
-
-            <div className="mb-6">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Advice to Juniors 
-              </label>
-              <textarea
-                placeholder="What advice would you give to future students?"
-                value={formData.advice_to_juniors}
-                onChange={(e) => handleInputChange('advice_to_juniors', e.target.value)}
-                className="w-full px-4 py-2 border border-gray-300 rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green"
-                rows="4"
-              />
-            </div>
-
-            <div className="mb-8">
-              <label className="block text-sm font-medium text-gray-700 mb-2">
-                Overall About the College <span className="text-red-500">*</span>
-              </label>
-              <textarea
-                placeholder="Share your overall thoughts about the college..."
-                value={formData.overall_about_college}
-                onChange={(e) => handleInputChange('overall_about_college', e.target.value)}
-                className={`w-full px-4 py-2 border rounded-lg focus:outline-none focus:ring-2 focus:ring-becults-green ${
-                  validationErrors.overall_about_college ? 'border-red-500' : 'border-gray-300'
-                }`}
-                rows="4"
-              />
-              {validationErrors.overall_about_college && (
-                <p className="text-red-500 text-sm mt-1">{validationErrors.overall_about_college}</p>
-              )}
-            </div>
-
-            <button
-              type="submit"
-              disabled={isSubmitting}
-              className="w-full px-6 py-3 bg-becults-green text-white font-bold rounded-lg hover:bg-becults-dark transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isSubmitting ? 'Submitting...' : 'Submit Review'}
-            </button>
           </div>
         </form>
       </div>

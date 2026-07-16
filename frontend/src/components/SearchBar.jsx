@@ -56,7 +56,7 @@ export default function SearchBar() {
           placeholder="Search colleges..."
           value={query}
           onChange={(e) => setQuery(e.target.value)}
-          className="w-full rounded-[20px] border border-[#EDF5FAFC] bg-[#EDF5FAFC] px-5 py-4 pr-14 text-base text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
+          className="w-full rounded-[20px] border border-[#ccd6dcfc] bg-[#EDF5FAFC] px-5 py-4 pr-14 text-base text-slate-900 shadow-inner outline-none transition placeholder:text-slate-400 focus:border-sky-400 focus:ring-4 focus:ring-sky-100"
         />
         {isLoading && (
           <div className="absolute right-4 top-1/2 -translate-y-1/2">

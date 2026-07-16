@@ -46,7 +46,7 @@ export default function HomePage() {
       </div>
 
       <div className="px-4 pb-10">
-        <div className="mx-auto max-w-4xl rounded-[28px] border border-sky-200 bg-white/95 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur md:p-5">
+        <div className="mx-auto max-w-4xl rounded-[28px] border border-sky-100 bg-white/95 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur md:p-5">
           <SearchBar />
         </div>
       </div>
@@ -54,7 +54,7 @@ export default function HomePage() {
       <div className="mx-auto max-w-4xl px-4 pb-12 md:pb-16">
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
-            <h2 className="text-xl font-bold text-slate-900 md:text-2xl">Top Colleges</h2>
+            {/* <h2 className="text-xl font-bold text-slate-900 md:text-2xl">Top Colleges</h2> */}
             <p className="mt-1 text-sm text-slate-600">The most reviewed colleges on the platform.</p>
           </div>
           <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
@@ -81,7 +81,7 @@ export default function HomePage() {
                 id={college.id}
                 name={college.name}
                 location={college.location}
-                average_rating={college.average_rating}
+                // average_rating={college.average_rating}
                 total_reviews={college.total_reviews}
               />
             ))}
