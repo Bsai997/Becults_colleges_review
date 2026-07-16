@@ -38,6 +38,15 @@ const FIELD_QUESTIONS = {
     'What is the social life and friend-making potential?',
     'Are there regular fests and events throughout the year?',
     'How supportive is the college for student initiatives?'
+  ],
+  accommodation: [
+    'What is the quality of college accommodation and hostel facilities?',
+    'How is the food quality and variety in the mess/canteen?',
+    'Are there adequate bathroom and hygiene facilities?',
+    'What is the security and safety situation in hostels?',
+    'How flexible are the hostel rules and curfew timings?',
+    'Is accommodation available for all students or limited to certain years?',
+    'What is the cost of accommodation compared to nearby private hostels?'
   ]
 };
 
@@ -50,9 +59,27 @@ export default function AddReviewPage() {
   const [successMessage, setSuccessMessage] = useState(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [expandedBlocks, setExpandedBlocks] = useState({
-    honestReview: false
+    honestReview: false,
+    accommodation: false,
+    juniorAdvice: false,
+    studentInformation: false
   });
   const [expandedQuestions, setExpandedQuestions] = useState({});
+  const [accommodationDetails, setAccommodationDetails] = useState({
+    studentType: 'hosteller',
+    hostelFacilities: 'no',
+    outsideHostel: 'no'
+  });
+  const [studentInfo, setStudentInfo] = useState({
+    seatType: 'eapcet',
+    eapcetRank: '',
+    collegeId: '',
+    branch: '',
+    year: '',
+    batch: '',
+    instagramId: '',
+    name: ''
+  });
 
   // Toggle expandable blocks
   const toggleBlock = (blockName) => {
@@ -77,6 +104,7 @@ export default function AddReviewPage() {
     techEvents: '',
     infrastructure: '',
     collegeLife: '',
+    accommodation: '',
     pros: [''],
     cons: [''],
     advice_to_juniors: '',
@@ -131,6 +159,14 @@ export default function AddReviewPage() {
     }));
   };
 
+  const removeArrayItem = (field, index) => {
+    setFormData(prev => {
+      const items = prev[field];
+      const updatedItems = items.length === 1 ? [''] : items.filter((_, itemIndex) => itemIndex !== index);
+      return { ...prev, [field]: updatedItems };
+    });
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -141,9 +177,13 @@ export default function AddReviewPage() {
     if (!formData.infrastructure.trim()) errors.infrastructure = 'Infrastructure & Sports review is required';
     if (!formData.collegeLife.trim()) errors.collegeLife = 'College life review is required';
 
+    // Block 2 validation - Accommodation
+    if (!formData.accommodation.trim()) errors.accommodation = 'Accommodation review is required';
+
     // Block 3 validation
     if (formData.pros.filter(p => p.trim()).length === 0) errors.pros = 'At least one positive is required';
     if (formData.cons.filter(c => c.trim()).length === 0) errors.cons = 'At least one negative is required';
+    if (!formData.advice_to_juniors.trim()) errors.advice_to_juniors = 'Advice to juniors is required';
     if (!formData.overall_about_college.trim()) errors.overall_about_college = 'Overall about college is required';
 
     setValidationErrors(errors);
@@ -162,11 +202,23 @@ export default function AddReviewPage() {
       setIsSubmitting(true);
       const submitData = {
         college_id: collegeId,
+        name: studentInfo.name,
+        college_id_number: studentInfo.collegeId,
+        branch: studentInfo.branch,
+        year: studentInfo.year,
+        batch: studentInfo.batch,
+        admission_type: studentInfo.seatType,
+        eapcet_rank: studentInfo.eapcetRank,
+        instagram_id: studentInfo.instagramId,
+        is_hosteller: accommodationDetails.studentType === 'hosteller',
+        college_hostel_available: accommodationDetails.hostelFacilities === 'yes',
+        outside_hostel: accommodationDetails.outsideHostel === 'yes',
         faculty: formData.faculty,
         placements: formData.placements,
         tech_events: formData.techEvents,
         infrastructure: formData.infrastructure,
         college_life: formData.collegeLife,
+        accommodation: formData.accommodation,
         pros: formData.pros.filter(p => p.trim()),
         cons: formData.cons.filter(c => c.trim()),
         advice_to_juniors: formData.advice_to_juniors,
@@ -286,7 +338,7 @@ export default function AddReviewPage() {
                     </button>
                   </div>
                   {expandedQuestions.faculty && (
-                    <div 
+                    <div
                       className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
                       onClick={() => toggleQuestions('faculty')}
                     >
@@ -496,6 +548,341 @@ export default function AddReviewPage() {
                     rows="3"
                   />
                   {validationErrors.collegeLife && <p className="text-red-500 text-sm mt-1">{validationErrors.collegeLife}</p>}
+                </div>
+              </div>
+            )}
+          </div>
+
+          {/* BLOCK 2: Accommodation */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <button
+              type="button"
+              onClick={() => toggleBlock('accommodation')}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900">Accommodation</h3>
+              <ChevronDown
+                size={22}
+                className={`text-gray-600 transition-transform ${expandedBlocks.accommodation ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {expandedBlocks.accommodation && <div className="border-t border-gray-200 p-5 sm:p-6">
+            <div className="space-y-3">
+              <div>
+                <p className="text-sm font-medium text-gray-800 mb-2">Are you a Hosteller or Day Scholar? <span className="text-red-500">*</span></p>
+                <div className="grid grid-cols-2 gap-2">
+                  {[
+                    ['dayScholar', 'Day Scholar'],
+                    ['hosteller', 'Hosteller']
+                  ].map(([value, label]) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAccommodationDetails(prev => ({ ...prev, studentType: value }))}
+                      className={`h-8 rounded-xl border text-xs font-medium transition-colors ${
+                        accommodationDetails.studentType === value
+                          ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                          : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                      }`}
+                    >
+                      {label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-800 mb-2">College hostel facilities available?</p>
+                <div className="flex gap-2">
+                  {['yes', 'no'].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAccommodationDetails(prev => ({ ...prev, hostelFacilities: value }))}
+                      className={`h-6 min-w-11 rounded-lg border px-3 text-[10px] font-medium capitalize transition-colors ${
+                        accommodationDetails.hostelFacilities === value
+                          ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                          : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div>
+                <p className="text-sm font-medium text-gray-800 mb-2">Staying in outside hostel?</p>
+                <div className="flex gap-2">
+                  {['yes', 'no'].map((value) => (
+                    <button
+                      key={value}
+                      type="button"
+                      onClick={() => setAccommodationDetails(prev => ({ ...prev, outsideHostel: value }))}
+                      className={`h-6 min-w-11 rounded-lg border px-3 text-[10px] font-medium capitalize transition-colors ${
+                        accommodationDetails.outsideHostel === value
+                          ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                          : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                      }`}
+                    >
+                      {value}
+                    </button>
+                  ))}
+                </div>
+              </div>
+
+              <div className="relative pt-1">
+                  <div className="flex items-center justify-between mb-3">
+                    <label className="text-sm font-semibold text-gray-800">Hostel Rating <span className="text-red-500">*</span></label>
+                    <button
+                      type="button"
+                      onClick={() => toggleQuestions('accommodation')}
+                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#1d1c1c] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                      title="View guiding questions"
+                    >
+                      <span>Q's</span>
+                      <ChevronDown
+                        size={12}
+                        className={`transition-transform ${expandedQuestions.accommodation ? 'rotate-180' : ''}`}
+                      />
+                    </button>
+                  </div>
+                  {expandedQuestions.accommodation && (
+                    <div
+                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      onClick={() => toggleQuestions('accommodation')}
+                    >
+                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                        {FIELD_QUESTIONS.accommodation.map((question, idx) => (
+                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                            <div className="flex gap-2">
+                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                              <p className="text-gray-900">{question}</p>
+                            </div>
+                          </div>
+                        ))}
+                      </div>
+                    </div>
+                  )}
+                  <textarea
+                    placeholder="Share your honest hostel experience."
+                    value={formData.accommodation}
+                    onChange={(e) => setFormData(prev => ({...prev, accommodation: e.target.value}))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
+                      validationErrors.accommodation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#ef6c20]'
+                    }`}
+                    rows="3"
+                  />
+                  {validationErrors.accommodation && <p className="text-red-500 text-sm mt-1">{validationErrors.accommodation}</p>}
+                </div>
+            </div>
+            </div>}
+          </div>
+
+          {/* BLOCK 3: What Every Junior Should Know */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <button
+              type="button"
+              onClick={() => toggleBlock('juniorAdvice')}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900">What Every Junior Should Know</h3>
+              <ChevronDown
+                size={22}
+                className={`text-gray-600 transition-transform ${expandedBlocks.juniorAdvice ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {expandedBlocks.juniorAdvice && <div className="border-t border-gray-200 p-5 sm:p-6">
+            <div className="space-y-3">
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Positives <span className="text-red-500">*</span></label>
+                {formData.pros.map((positive, index) => (
+                  <div key={index} className="flex gap-1.5 mb-2">
+                    <input
+                      type="text"
+                      value={positive}
+                      onChange={(e) => handleArrayChange('pros', index, e.target.value)}
+                      placeholder="Custom..."
+                      className="min-w-0 flex-1 h-7 rounded-md border border-gray-400 px-2 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeArrayItem('pros', index)}
+                      className="h-7 w-7 rounded-md border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50"
+                      aria-label={`Delete positive ${index + 1}`}
+                      title="Delete positive"
+                    >
+                      ×
+                    </button>
+                    {index === formData.pros.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => addArrayItem('pros')}
+                        className="h-7 rounded-md bg-[#2475aa] px-3 text-xs font-medium text-white hover:bg-[#1e6493]"
+                      >
+                        + Add
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {validationErrors.pros && <p className="text-red-500 text-sm mt-1">{validationErrors.pros}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Negatives <span className="text-red-500">*</span></label>
+                {formData.cons.map((negative, index) => (
+                  <div key={index} className="flex gap-1.5 mb-2">
+                    <input
+                      type="text"
+                      value={negative}
+                      onChange={(e) => handleArrayChange('cons', index, e.target.value)}
+                      placeholder="Custom..."
+                      className="min-w-0 flex-1 h-7 rounded-md border border-gray-400 px-2 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]"
+                    />
+                    <button
+                      type="button"
+                      onClick={() => removeArrayItem('cons', index)}
+                      className="h-7 w-7 rounded-md border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50"
+                      aria-label={`Delete negative ${index + 1}`}
+                      title="Delete negative"
+                    >
+                      ×
+                    </button>
+                    {index === formData.cons.length - 1 && (
+                      <button
+                        type="button"
+                        onClick={() => addArrayItem('cons')}
+                        className="h-7 rounded-md bg-[#2475aa] px-3 text-xs font-medium text-white hover:bg-[#1e6493]"
+                      >
+                        + Add
+                      </button>
+                    )}
+                  </div>
+                ))}
+                {validationErrors.cons && <p className="text-red-500 text-sm mt-1">{validationErrors.cons}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Advice To Juniors <span className="text-red-500">*</span></label>
+                <textarea
+                  value={formData.advice_to_juniors}
+                  onChange={(e) => handleInputChange('advice_to_juniors', e.target.value)}
+                  placeholder="What advice would you give juniors?"
+                  rows="3"
+                  className={`w-full resize-none rounded-xl border px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 ${
+                    validationErrors.advice_to_juniors ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'
+                  }`}
+                />
+                {validationErrors.advice_to_juniors && <p className="text-red-500 text-sm mt-1">{validationErrors.advice_to_juniors}</p>}
+              </div>
+
+              <div>
+                <label className="block text-sm font-medium text-gray-800 mb-1">Overall About the College <span className="text-red-500">*</span></label>
+                <textarea
+                  value={formData.overall_about_college}
+                  onChange={(e) => handleInputChange('overall_about_college', e.target.value)}
+                  placeholder="Help your brothers & sisters make the right choice."
+                  rows="3"
+                  className={`w-full resize-none rounded-xl border px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 ${
+                    validationErrors.overall_about_college ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'
+                  }`}
+                />
+                {validationErrors.overall_about_college && <p className="text-red-500 text-sm mt-1">{validationErrors.overall_about_college}</p>}
+              </div>
+            </div>
+            </div>}
+          </div>
+
+          {/* BLOCK 4: Student Information */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <button
+              type="button"
+              onClick={() => toggleBlock('studentInformation')}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900">Student Information</h3>
+              <ChevronDown size={22} className={`text-gray-600 transition-transform ${expandedBlocks.studentInformation ? 'rotate-180' : ''}`} />
+            </button>
+
+            {expandedBlocks.studentInformation && (
+              <div className="border-t border-gray-200 p-5 sm:p-6">
+                <div className="space-y-3">
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 mb-2">Management or EAPCET Seat? <span className="text-red-500">*</span></p>
+                    <div className="grid grid-cols-2 gap-2">
+                      {[['management', 'Management'], ['eapcet', 'EAPCET']].map(([value, label]) => (
+                        <button key={value} type="button" onClick={() => setStudentInfo(prev => ({ ...prev, seatType: value }))} className={`h-8 rounded-xl border text-xs font-medium transition-colors ${studentInfo.seatType === value ? 'border-[#2475aa] bg-[#2475aa] text-white' : 'border-[#d4a38d] bg-white text-[#ef6c20]'}`}>
+                          {label}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-800 mb-1">EAPCET Rank <span className="text-red-500">*</span></span>
+                    <input type="text" value={studentInfo.eapcetRank} onChange={(e) => setStudentInfo(prev => ({ ...prev, eapcetRank: e.target.value }))} placeholder="eg : 5624" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                  </label>
+
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-800 mb-1">College ID <span className="text-red-500">*</span></span>
+                    <input type="text" value={studentInfo.collegeId} onChange={(e) => setStudentInfo(prev => ({ ...prev, collegeId: e.target.value }))} placeholder="eg : 24B91xxxxx" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                  </label>
+
+                  <div className="grid grid-cols-2 gap-2">
+                    <label>
+                      <span className="block text-sm font-medium text-gray-800 mb-1">Branch ? <span className="text-red-500">*</span></span>
+                      <select value={studentInfo.branch} onChange={(e) => setStudentInfo(prev => ({ ...prev, branch: e.target.value }))} className="w-full h-7 rounded-md border border-gray-400 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#2475aa]">
+                        <option value="">Select branch</option>
+                        <option value="CSE">CSE</option>
+                        <option value="CSE (AI & ML)">CSE (AI & ML)</option>
+                        <option value="CSE (Data Science)">CSE (Data Science)</option>
+                        <option value="IT">IT</option>
+                        <option value="ECE">ECE</option>
+                        <option value="EEE">EEE</option>
+                        <option value="Mechanical">Mechanical</option>
+                        <option value="Civil">Civil</option>
+                        <option value="Other">Other</option>
+                      </select>
+                    </label>
+                    <label>
+                      <span className="block text-sm font-medium text-gray-800 mb-1">Year ? <span className="text-red-500">*</span></span>
+                      <select value={studentInfo.year} onChange={(e) => setStudentInfo(prev => ({ ...prev, year: e.target.value }))} className="w-full h-7 rounded-md border border-gray-400 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#2475aa]">
+                        <option value="">Select year</option>
+                        <option value="1">1st year</option>
+                        <option value="2">2nd year</option>
+                        <option value="3">3rd year</option>
+                        <option value="4">4th year</option>
+                      </select>
+                    </label>
+                  </div>
+
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-800 mb-1">Batch ? <span className="text-red-500">*</span></span>
+                    <select value={studentInfo.batch} onChange={(e) => setStudentInfo(prev => ({ ...prev, batch: e.target.value }))} className="w-full h-7 rounded-md border border-gray-400 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#2475aa]">
+                      <option value="">Select batch</option>
+                      {Array.from({ length: 10 }, (_, index) => {
+                        const startYear = 2020 + index;
+                        return <option key={startYear} value={`${startYear} - ${startYear + 1}`}>{startYear} - {startYear + 1}</option>;
+                      })}
+                    </select>
+                  </label>
+
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-800 mb-1">Instagram id ? <span className="text-red-500">*</span></span>
+                    <input type="text" value={studentInfo.instagramId} onChange={(e) => setStudentInfo(prev => ({ ...prev, instagramId: e.target.value }))} placeholder="eg : your_insta_id" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                  </label>
+
+                  <label className="block">
+                    <span className="block text-sm font-medium text-gray-800 mb-1">Name ? <span className="text-red-500">*</span></span>
+                    <input type="text" value={studentInfo.name} onChange={(e) => setStudentInfo(prev => ({ ...prev, name: e.target.value }))} placeholder="eg : Johndeo" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                  </label>
+
+                  <button type="submit" disabled={isSubmitting} className="w-full h-9 rounded-lg bg-[#2475aa] text-xs font-medium text-white hover:bg-[#1e6493] disabled:cursor-not-allowed disabled:opacity-60">
+                    {isSubmitting ? 'Submitting...' : 'Submit Review'}
+                  </button>
+                  <p className="text-center text-xs text-gray-600">🔒 Your information stays private.</p>
                 </div>
               </div>
             )}

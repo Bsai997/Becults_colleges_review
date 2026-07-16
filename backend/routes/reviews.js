@@ -75,17 +75,18 @@ router.post('/reviews', async (req, res) => {
       branch,
       year,
       batch,
+      admission_type,
+      eapcet_rank,
+      instagram_id,
       is_hosteller,
       college_hostel_available,
       outside_hostel,
-      faculty_rating,
-      faculty_reason,
-      placements_rating,
-      placements_reason,
-      infrastructure_rating,
-      infrastructure_reason,
-      hostel_rating,
-      hostel_reason,
+      faculty,
+      placements,
+      tech_events,
+      infrastructure,
+      college_life,
+      accommodation,
       pros,
       cons,
       advice_to_juniors,
@@ -100,11 +101,16 @@ router.post('/reviews', async (req, res) => {
       'branch',
       'year',
       'batch',
-      'faculty_rating',
-      'placements_rating',
-      'infrastructure_rating',
+      'admission_type',
+      'faculty',
+      'placements',
+      'tech_events',
+      'infrastructure',
+      'college_life',
+      'accommodation',
       'pros',
       'cons',
+      'advice_to_juniors',
       'overall_about_college'
     ];
 
@@ -121,30 +127,14 @@ router.post('/reviews', async (req, res) => {
       missingFields.push('is_hosteller');
     }
 
-    if (req.body.is_hosteller && !req.body.hostel_rating) {
-      missingFields.push('hostel_rating');
-    }
-
     if (missingFields.length > 0) {
       return res.status(400).json({
         error: `Missing required fields: ${missingFields.join(', ')}`
       });
     }
 
-    // Calculate overall_rating
-    let ratingSum = faculty_rating + placements_rating + infrastructure_rating;
-    let ratingCount = 3;
-
-    if (is_hosteller && hostel_rating) {
-      ratingSum += hostel_rating;
-      ratingCount = 4;
-    }
-
-    const overallRating = parseFloat((ratingSum / ratingCount).toFixed(1));
-
     console.log('Attempting to insert review with:', {
       college_id,
-      overall_rating: overallRating,
       pros_count: pros?.length,
       cons_count: cons?.length
     });
@@ -160,22 +150,22 @@ router.post('/reviews', async (req, res) => {
           branch,
           year: parseInt(year),
           batch,
+          admission_type,
+          eapcet_rank: eapcet_rank ? parseInt(eapcet_rank) : null,
+          instagram_id,
           is_hosteller,
-          college_hostel_available: is_hosteller ? college_hostel_available : null,
-          outside_hostel: is_hosteller ? outside_hostel : null,
-          faculty_rating: parseInt(faculty_rating),
-          faculty_reason,
-          placements_rating: parseInt(placements_rating),
-          placements_reason,
-          infrastructure_rating: parseInt(infrastructure_rating),
-          infrastructure_reason,
-          hostel_rating: is_hosteller ? parseInt(hostel_rating) : null,
-          hostel_reason: is_hosteller ? hostel_reason : null,
+          college_hostel_available,
+          outside_hostel,
+          faculty,
+          placements,
+          tech_events,
+          infrastructure,
+          college_life,
+          accommodation,
           pros: pros.filter(p => p.trim()),
           cons: cons.filter(c => c.trim()),
           advice_to_juniors,
-          overall_about_college,
-          overall_rating: overallRating
+          overall_about_college
         }
       ])
       .select()
