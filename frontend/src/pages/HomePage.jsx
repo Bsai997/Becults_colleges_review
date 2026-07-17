@@ -35,8 +35,9 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 shadow-sm backdrop-blur">
             BECULTS
           </div>
-          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-slate-900 md:text-6xl">
-            College Reviews
+          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#1A699F] md:text-6xl">
+            College 
+            <span className="text-[#0e0f10] font-sans font-extrabold cd fr "> Reviews</span>
             <span className="block text-slate-800">by <span className="text-[#ef6c20]">College Students</span></span>
           </h1>
           <p className="mt-4 max-w-xl text-sm text-slate-600 md:text-base">

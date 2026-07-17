@@ -99,16 +99,16 @@ export default function OpenReviewsPage() {
 
         {/* Hero heading — matches screenshot */}
         <h1 className="mb-1 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl font-sans">
-          Make the <span className="text-[#2475aa] font-sans font-extrabold ">Right Choice</span> with
+          Make the <br /><span className="text-[#2475aa] font-sans font-extrabold cd fr ">Right Choice with</span> 
         </h1>
-        <h1 className="mb-5 text-3xl font-extrabold leading-tight text-[#D3540D] sm:text-4xl font-sans">
+     <h1 className="mb-5 text-3xl font-extrabold leading-tight text-[#D3540D] sm:text-4xl font-sans">
           Senior Suggestions
         </h1>
 
-        <p className="mb-4 text-sm text-slate-500">
+        {/* <p className="mb-4 text-sm text-slate-500">
           {college.name} · {college.location}
           {college.affiliation ? ` · ${college.affiliation}` : ''}
-        </p>
+        </p> */}
 
         {/* Branch dropdown — matches "Select Branch" pill in screenshot */}
         <div className="relative mb-6">

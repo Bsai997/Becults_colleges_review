@@ -91,7 +91,7 @@ export default function ReviewCard({ review }) {
         {review.overall_about_college && (
           <section>
             <h3 className="mb-1.5 text-sm font-semibold text-slate-900">Overall About the College</h3>
-            <p className="whitespace-pre-wrap rounded-xl bg-slate-50 px-4 py-3 text-sm   text-slate-600">
+            <p className="whitespace-pre-wrap rounded-xl bg-slate-50 px-4 py-3 text-sm   text-black fontweight:extrabold">
               "{review.overall_about_college}"
             </p>
           </section>
@@ -100,7 +100,7 @@ export default function ReviewCard({ review }) {
         {review.advice_to_juniors && (
           <section>
             <h3 className="mb-1.5 text-sm font-semibold text-slate-900">Advice To Juniors</h3>
-            <p className="whitespace-pre-wrap rounded-xl bg-slate-50 px-4 py-3 text-sm  text-slate-600">
+            <p className="whitespace-pre-wrap rounded-xl bg-slate-50 px-4 py-3 text-sm  text-black fontweight:extrabold">
               "{review.advice_to_juniors}"
             </p>
           </section>
