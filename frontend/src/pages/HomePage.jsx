@@ -21,7 +21,7 @@ export default function HomePage() {
       setError(null);
     } catch (err) {
       console.error('Error fetching colleges:', err);
-      setError('Failed to load colleges. Please try again later.');
+      setError('Please refresh the page to Load the colleges.');
     } finally {
       setIsLoading(false);
     }
@@ -83,7 +83,7 @@ export default function HomePage() {
                 name={college.name}
                 location={college.location}
                 // average_rating={college.average_rating}
-                total_reviews={college.total_reviews}
+                // total_reviews={college.total_reviews}
               />
             ))}
           </div>

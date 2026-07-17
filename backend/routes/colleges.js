@@ -45,48 +45,48 @@ router.get('/colleges/search', async (req, res) => {
 });
 
 // GET /api/colleges/:collegeId/stats - Get college statistics (must be before :collegeId route)
-router.get('/colleges/:collegeId/stats', async (req, res) => {
-  try {
-    const { collegeId } = req.params;
-    console.log('Fetching stats for collegeId:', collegeId);
+// router.get('/colleges/:collegeId/stats', async (req, res) => {
+//   try {
+//     const { collegeId } = req.params;
+//     console.log('Fetching stats for collegeId:', collegeId);
 
-    const { data, error } = await supabase
-      .from('reviews')
-      .select('id')
-      .eq('college_id', collegeId);
+//     const { data, error } = await supabase
+//       .from('reviews')
+//       .select('id')
+//       .eq('college_id', collegeId);
 
-    if (error) {
-      console.error('Error querying reviews:', error);
-      throw error;
-    }
+//     if (error) {
+//       console.error('Error querying reviews:', error);
+//       throw error;
+//     }
 
-    if (data.length === 0) {
-      return res.json({
-        average_overall_rating: 0,
-        average_faculty_rating: 0,
-        average_placements_rating: 0,
-        average_infrastructure_rating: 0,
-        average_hostel_rating: 0,
-        total_reviews: 0
-      });
-    }
+//     if (data.length === 0) {
+//       return res.json({
+//         average_overall_rating: 0,
+//         average_faculty_rating: 0,
+//         average_placements_rating: 0,
+//         average_infrastructure_rating: 0,
+//         average_hostel_rating: 0,
+//         total_reviews: 0
+//       });
+//     }
 
-    // The current review form collects written feedback rather than numeric ratings.
-    const stats = {
-      average_overall_rating: 0,
-      average_faculty_rating: 0,
-      average_placements_rating: 0,
-      average_infrastructure_rating: 0,
-      average_hostel_rating: 0,
-      total_reviews: data.length
-    };
+//     // The current review form collects written feedback rather than numeric ratings.
+//     const stats = {
+//       average_overall_rating: 0,
+//       average_faculty_rating: 0,
+//       average_placements_rating: 0,
+//       average_infrastructure_rating: 0,
+//       average_hostel_rating: 0,
+//       total_reviews: data.length
+//     };
 
-    res.json(stats);
-  } catch (error) {
-    console.error('Error fetching college stats:', error);
-    res.status(500).json({ error: error.message });
-  }
-});
+//     res.json(stats);
+//   } catch (error) {
+//     console.error('Error fetching college stats:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
 
 // GET /api/colleges/:collegeId - Get single college details
 router.get('/colleges/:collegeId', async (req, res) => {
