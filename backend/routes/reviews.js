@@ -8,8 +8,7 @@ router.get('/reviews/:collegeId', async (req, res) => {
   try {
     const { collegeId } = req.params;
     const { branch, year, type, page = 1 } = req.query;
-    console.log('GET /reviews/:collegeId - collegeId:', collegeId, 'page:', page);
-    
+
     const pageNum = parseInt(page) || 1;
     const limit = 10;
     const offset = (pageNum - 1) * limit;
@@ -19,7 +18,6 @@ router.get('/reviews/:collegeId', async (req, res) => {
       .select('*', { count: 'exact' })
       .eq('college_id', collegeId);
 
-    // Apply filters
     if (branch) {
       query = query.eq('branch', branch);
     }
@@ -34,7 +32,6 @@ router.get('/reviews/:collegeId', async (req, res) => {
       query = query.eq('is_hosteller', false);
     }
 
-    // Order by created_at descending and apply pagination
     const { data, error, count } = await query
       .order('created_at', { ascending: false })
       .range(offset, offset + limit - 1);
@@ -46,17 +43,18 @@ router.get('/reviews/:collegeId', async (req, res) => {
 
     const totalPages = Math.ceil((count || 0) / limit);
 
-    const responseData = {
+    // Never cache this response — review data changes on every submission.
+    // The old static ETag ("reviews-{id}-{page}") never changed with the
+    // data, so browsers were serving up-to-60s-stale results instead of
+    // hitting the server at all.
+    res.set('Cache-Control', 'no-store');
+
+    res.json({
       reviews: data,
       total_count: count,
       page: pageNum,
-      total_pages: totalPages
-    };
-
-    // Add cache headers
-    res.set('Cache-Control', 'public, max-age=60');
-    res.set('ETag', `"reviews-${collegeId}-${pageNum}"`);
-    res.json(responseData);
+      total_pages: totalPages,
+    });
   } catch (error) {
     console.error('Error fetching reviews:', error);
     res.status(500).json({ error: error.message });
