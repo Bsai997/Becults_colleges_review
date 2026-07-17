@@ -107,7 +107,6 @@ router.post('/reviews', async (req, res) => {
       'tech_events',
       'infrastructure',
       'college_life',
-      'accommodation',
       'pros',
       'cons',
       'advice_to_juniors',
@@ -127,10 +126,38 @@ router.post('/reviews', async (req, res) => {
       missingFields.push('is_hosteller');
     }
 
+    if (req.body.is_hosteller && !req.body.accommodation?.trim()) {
+      missingFields.push('accommodation');
+    }
+
     if (missingFields.length > 0) {
       return res.status(400).json({
         error: `Missing required fields: ${missingFields.join(', ')}`
       });
+    }
+
+    const parsedYear = Number.parseInt(year, 10);
+    if (!Number.isInteger(parsedYear) || parsedYear < 1 || parsedYear > 4) {
+      return res.status(400).json({
+        error: 'Invalid year. Please select a valid year between 1 and 4.'
+      });
+    }
+
+    let parsedEapcetRank = null;
+    if (admission_type === 'eapcet') {
+      const rankString = String(eapcet_rank ?? '').trim();
+      if (!rankString) {
+        return res.status(400).json({
+          error: 'EAPCET rank is required for EAPCET admission type.'
+        });
+      }
+
+      parsedEapcetRank = Number.parseInt(rankString, 10);
+      if (!Number.isInteger(parsedEapcetRank) || parsedEapcetRank <= 0) {
+        return res.status(400).json({
+          error: 'Invalid EAPCET rank. Please enter digits only.'
+        });
+      }
     }
 
     console.log('Attempting to insert review with:', {
@@ -148,10 +175,10 @@ router.post('/reviews', async (req, res) => {
           name,
           college_id_number,
           branch,
-          year: parseInt(year),
+          year: parsedYear,
           batch,
           admission_type,
-          eapcet_rank: eapcet_rank ? parseInt(eapcet_rank) : null,
+          eapcet_rank: parsedEapcetRank,
           instagram_id,
           is_hosteller,
           college_hostel_available,
@@ -161,7 +188,7 @@ router.post('/reviews', async (req, res) => {
           tech_events,
           infrastructure,
           college_life,
-          accommodation,
+          accommodation: is_hosteller ? accommodation : '',
           pros: pros.filter(p => p.trim()),
           cons: cons.filter(c => c.trim()),
           advice_to_juniors,

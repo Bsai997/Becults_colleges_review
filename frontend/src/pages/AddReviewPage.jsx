@@ -6,17 +6,23 @@ import api from '../api/axios';
 // Questions for each rating field
 const FIELD_QUESTIONS = {
   faculty: [
+    'Are the faculty members approachable when you have doubts?',
     'Do teachers explain concepts clearly or mostly read from slides?',
     'Are faculty supportive of projects, hackathons, research, or startups?',
+    'Do faculty encourage skill development beyond the syllabus?',
+    'How strict are the faculty regarding attendance and assignments?',
     'Which department has the strongest faculty, and why?',
     'What should a new student know about the teaching style here?'
   ],
   placements: [
-    'What is the average salary offered during placements?',
-    'What types of companies visit for recruitment?',
-    'How is the placement process conducted?',
-    'What skills do recruiters look for in candidates?',
-    'Are there opportunities for higher studies or MBA placements?'
+    'What is the real placement situation in your branch?',
+    'Which companies actually hired students from your batch?',
+    'Did the college provide useful placement training?',
+    'Are internship opportunities easily available?',
+    'Do students get opportunities based on skills or mostly CGPA?',
+    'What should juniors start preparing for from first year?',
+    'What is one placement reality that advertisements donot mention?'
+
   ],
   techEvents: [
     'What technical workshops and seminars are organized?',
@@ -50,6 +56,23 @@ const FIELD_QUESTIONS = {
   ]
 };
 
+const REVIEW_SUGGESTIONS = {
+  pros: [
+    'Good Placements', 'Friendly Faculty', 'Student Freedom', 'Internship Support',
+    'Good Infrastructure', 'Good Hostel', 'Good Hostel Food', 'Strong Coding Culture',
+    'Tech Fests', 'Cultural Fests', 'Active Clubs', 'Startup Support', 'Modern Labs',
+    'Good Library', 'Fast Wi-Fi', 'Cricket Ground', 'Basketball / Badminton Courts',
+    'Ragging Free', 'Good Canteen', 'Value for Money'
+  ],
+  cons: [
+    'Poor Placements', 'Strict Attendance', 'Strict Rules', 'Poor Hostel Food',
+    'Poor Hostel', 'Poor Infrastructure', 'Unsupportive Faculty', 'Poor Teaching',
+    'Outdated Labs', 'Poor Wi-Fi', 'Limited Internships', 'No Startup Support',
+    'Inactive Clubs', 'Fewer Tech Events', 'Poor Canteen', 'No Student Freedom',
+    'Long College Hours', 'Hidden Fees', 'Poor Management', 'Weak Coding Culture'
+  ]
+};
+
 export default function AddReviewPage() {
   const { collegeId } = useParams();
   const navigate = useNavigate();
@@ -65,8 +88,10 @@ export default function AddReviewPage() {
     studentInformation: false
   });
   const [expandedQuestions, setExpandedQuestions] = useState({});
+  const [suggestionField, setSuggestionField] = useState(null);
+  const [customTag, setCustomTag] = useState({ pros: '', cons: '' });
   const [accommodationDetails, setAccommodationDetails] = useState({
-    studentType: 'hosteller',
+    studentType: 'dayScholar',
     hostelFacilities: 'no',
     outsideHostel: 'no'
   });
@@ -92,7 +117,6 @@ export default function AddReviewPage() {
   // Toggle question sections
   const toggleQuestions = (field) => {
     setExpandedQuestions(prev => ({
-      ...prev,
       [field]: !prev[field]
     }));
   };
@@ -112,6 +136,24 @@ export default function AddReviewPage() {
   });
 
   const [validationErrors, setValidationErrors] = useState({});
+
+  useEffect(() => {
+    const handleGlobalPointerDown = (event) => {
+      const target = event.target;
+      if (target.closest('[data-question-panel]') || target.closest('[data-question-trigger]')) {
+        return;
+      }
+      setExpandedQuestions({});
+    };
+
+    window.addEventListener('mousedown', handleGlobalPointerDown);
+    window.addEventListener('touchstart', handleGlobalPointerDown);
+
+    return () => {
+      window.removeEventListener('mousedown', handleGlobalPointerDown);
+      window.removeEventListener('touchstart', handleGlobalPointerDown);
+    };
+  }, []);
 
   const fetchCollege = async () => {
     try {
@@ -143,6 +185,17 @@ export default function AddReviewPage() {
     }));
   };
 
+  const handleStudentInfoChange = (field, value) => {
+    setStudentInfo(prev => ({
+      ...prev,
+      [field]: value
+    }));
+    setValidationErrors(prev => ({
+      ...prev,
+      [field]: ''
+    }));
+  };
+
   const handleArrayChange = (field, index, value) => {
     const newArray = [...formData[field]];
     newArray[index] = value;
@@ -167,6 +220,19 @@ export default function AddReviewPage() {
     });
   };
 
+  const addReviewTag = (field, value) => {
+    const tag = value.trim();
+    if (!tag) return;
+
+    setFormData(prev => {
+      const currentTags = prev[field].filter(item => item.trim());
+      if (currentTags.some(item => item.toLowerCase() === tag.toLowerCase())) return prev;
+      return { ...prev, [field]: [...currentTags, tag] };
+    });
+    setCustomTag(prev => ({ ...prev, [field]: '' }));
+    setValidationErrors(prev => ({ ...prev, [field]: '' }));
+  };
+
   const validateForm = () => {
     const errors = {};
 
@@ -178,7 +244,9 @@ export default function AddReviewPage() {
     if (!formData.collegeLife.trim()) errors.collegeLife = 'College life review is required';
 
     // Block 2 validation - Accommodation
-    if (!formData.accommodation.trim()) errors.accommodation = 'Accommodation review is required';
+    if (accommodationDetails.studentType === 'hosteller' && !formData.accommodation.trim()) {
+      errors.accommodation = 'Accommodation review is required';
+    }
 
     // Block 3 validation
     if (formData.pros.filter(p => p.trim()).length === 0) errors.pros = 'At least one positive is required';
@@ -186,12 +254,30 @@ export default function AddReviewPage() {
     if (!formData.advice_to_juniors.trim()) errors.advice_to_juniors = 'Advice to juniors is required';
     if (!formData.overall_about_college.trim()) errors.overall_about_college = 'Overall about college is required';
 
+    // Block 4 validation - Student information
+    if (!studentInfo.collegeId.trim()) errors.collegeId = 'College ID is required';
+    if (!studentInfo.branch.trim()) errors.branch = 'Branch is required';
+    if (!studentInfo.year.trim()) errors.year = 'Year is required';
+    if (!studentInfo.batch.trim()) errors.batch = 'Batch is required';
+    if (!studentInfo.instagramId.trim()) errors.instagramId = 'Instagram ID is required';
+    if (!studentInfo.name.trim()) errors.name = 'Name is required';
+
+    if (studentInfo.seatType === 'eapcet') {
+      if (!studentInfo.eapcetRank.trim()) {
+        errors.eapcetRank = 'EAPCET rank is required for EAPCET seat';
+      } else if (!/^\d+$/.test(studentInfo.eapcetRank.trim())) {
+        errors.eapcetRank = 'EAPCET rank must contain digits only';
+      }
+    }
+
     setValidationErrors(errors);
     return Object.keys(errors).length === 0;
   };
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
+    setError(null);
 
     if (!validateForm()) {
       window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -208,7 +294,7 @@ export default function AddReviewPage() {
         year: studentInfo.year,
         batch: studentInfo.batch,
         admission_type: studentInfo.seatType,
-        eapcet_rank: studentInfo.eapcetRank,
+        eapcet_rank: studentInfo.seatType === 'eapcet' ? studentInfo.eapcetRank.trim() : '',
         instagram_id: studentInfo.instagramId,
         is_hosteller: accommodationDetails.studentType === 'hosteller',
         college_hostel_available: accommodationDetails.hostelFacilities === 'yes',
@@ -286,21 +372,24 @@ export default function AddReviewPage() {
         )}
 
         {/* Header */}
-        <div className="mb-8">
-          <h1 className="text-3xl sm:text-3xl md:text-4xl font-bold text-gray-900 mb-2">
-            Say. <span className="text-[#ef6c20]">What no one told you</span>
-            <br /> before College Joining
-          </h1>
-        </div>
+        <div className="mb-9 font-calsans"> 
+  <h1 className="text-4xl sm:text-6xl md:text-4xl font-bold text-[#1A699F]"> 
+    Say. <span className="text-[#121111]">What <br/>no one told you</span> <br /> 
+    <span className="text-[#D3540D]">before College Joining</span> 
+  </h1> 
+</div>
 
-        {/* College Info */}
-        <div className="bg-white rounded-2xl shadow-sm p-6 mb-6">
-          <h2 className="text-2xl font-bold text-gray-800 mb-2">{college.name}</h2>
-          <p className="text-gray-600">{college.location}</p>
-        </div>
+
+        
 
         {/* Form - Block 1: Give Your Honest Review */}
-        <form onSubmit={handleSubmit} className="space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          onFocusCapture={(event) => {
+            if (!event.target.dataset.suggestionInput) setSuggestionField(null);
+          }}
+          className="space-y-4"
+        >
           {/* BLOCK 1: Give Your Honest Review */}
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
             {/* Block Header - Expandable */}
@@ -309,7 +398,7 @@ export default function AddReviewPage() {
               onClick={() => toggleBlock('honestReview')}
               className="w-full flex items-center justify-between bg-white px-6 py-4 hover:bg-gray-50 transition-colors"
             >
-              <h3 className="text-lg font-bold text-gray-900">Give your Honest Review</h3>
+              <h3 className="text-lg font-bold text-[#061327] font-sans" >Give your Honest Review</h3>
               <ChevronDown
                 size={24}
                 className={`text-gray-600 transition-transform ${expandedBlocks.honestReview ? 'rotate-180' : ''}`}
@@ -327,6 +416,7 @@ export default function AddReviewPage() {
                     <button
                       type="button"
                       onClick={() => toggleQuestions('faculty')}
+                      data-question-trigger="true"
                       className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#1d1c1c] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
                       title="View guiding questions"
                     >
@@ -339,8 +429,8 @@ export default function AddReviewPage() {
                   </div>
                   {expandedQuestions.faculty && (
                     <div
-                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      onClick={() => toggleQuestions('faculty')}
+                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      data-question-panel="true"
                     >
                       <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
                         {FIELD_QUESTIONS.faculty.map((question, idx) => (
@@ -369,10 +459,11 @@ export default function AddReviewPage() {
                 {/* Placements */}
                 <div className="relative">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-800">Placements <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-semibold text-[#061327]">Placements <span className="text-red-500">*</span></label>
                     <button
                       type="button"
                       onClick={() => toggleQuestions('placements')}
+                      data-question-trigger="true"
                       className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
                       title="View guiding questions"
                     >
@@ -385,8 +476,8 @@ export default function AddReviewPage() {
                   </div>
                   {expandedQuestions.placements && (
                     <div 
-                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      onClick={() => toggleQuestions('placements')}
+                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      data-question-panel="true"
                     >
                       <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
                         {FIELD_QUESTIONS.placements.map((question, idx) => (
@@ -415,10 +506,11 @@ export default function AddReviewPage() {
                 {/* Tech and Non Tech Events */}
                 <div className="relative">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-800">Tech and Non Tech Events <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-semibold text-[#061327]">Tech and Non Tech Events <span className="text-red-500">*</span></label>
                     <button
                       type="button"
                       onClick={() => toggleQuestions('techEvents')}
+                      data-question-trigger="true"
                       className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
                       title="View guiding questions"
                     >
@@ -431,8 +523,8 @@ export default function AddReviewPage() {
                   </div>
                   {expandedQuestions.techEvents && (
                     <div 
-                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      onClick={() => toggleQuestions('techEvents')}
+                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      data-question-panel="true"
                     >
                       <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
                         {FIELD_QUESTIONS.techEvents.map((question, idx) => (
@@ -461,10 +553,11 @@ export default function AddReviewPage() {
                 {/* Infrastructure & Sports */}
                 <div className="relative">
                   <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-800">Infrastructure & Sports <span className="text-red-500">*</span></label>
+                    <label className="text-sm font-semibold text-[#061327]">Infrastructure & Sports <span className="text-red-500">*</span></label>
                     <button
                       type="button"
                       onClick={() => toggleQuestions('infrastructure')}
+                      data-question-trigger="true"
                       className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
                       title="View guiding questions"
                     >
@@ -477,8 +570,8 @@ export default function AddReviewPage() {
                   </div>
                   {expandedQuestions.infrastructure && (
                     <div 
-                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      onClick={() => toggleQuestions('infrastructure')}
+                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      data-question-panel="true"
                     >
                       <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
                         {FIELD_QUESTIONS.infrastructure.map((question, idx) => (
@@ -511,6 +604,7 @@ export default function AddReviewPage() {
                     <button
                       type="button"
                       onClick={() => toggleQuestions('collegeLife')}
+                      data-question-trigger="true"
                       className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#212020] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
                       title="View guiding questions"
                     >
@@ -523,8 +617,8 @@ export default function AddReviewPage() {
                   </div>
                   {expandedQuestions.collegeLife && (
                     <div 
-                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      onClick={() => toggleQuestions('collegeLife')}
+                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      data-question-panel="true"
                     >
                       <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
                         {FIELD_QUESTIONS.collegeLife.map((question, idx) => (
@@ -571,7 +665,7 @@ export default function AddReviewPage() {
             <div className="space-y-3">
               <div>
                 <p className="text-sm font-medium text-gray-800 mb-2">Are you a Hosteller or Day Scholar? <span className="text-red-500">*</span></p>
-                <div className="grid grid-cols-2 gap-2">
+                <div className="flex max-w-sm gap-2">
                   {[
                     ['dayScholar', 'Day Scholar'],
                     ['hosteller', 'Hosteller']
@@ -580,7 +674,7 @@ export default function AddReviewPage() {
                       key={value}
                       type="button"
                       onClick={() => setAccommodationDetails(prev => ({ ...prev, studentType: value }))}
-                      className={`h-8 rounded-xl border text-xs font-medium transition-colors ${
+                      className={`h-10 w-36 rounded-xl border text-xs font-medium transition-colors ${
                         accommodationDetails.studentType === value
                           ? 'border-[#2475aa] bg-[#2475aa] text-white'
                           : 'border-[#d4a38d] bg-white text-[#ef6c20]'
@@ -592,6 +686,7 @@ export default function AddReviewPage() {
                 </div>
               </div>
 
+              {accommodationDetails.studentType === 'hosteller' && <>
               <div>
                 <p className="text-sm font-medium text-gray-800 mb-2">College hostel facilities available?</p>
                 <div className="flex gap-2">
@@ -600,7 +695,7 @@ export default function AddReviewPage() {
                       key={value}
                       type="button"
                       onClick={() => setAccommodationDetails(prev => ({ ...prev, hostelFacilities: value }))}
-                      className={`h-6 min-w-11 rounded-lg border px-3 text-[10px] font-medium capitalize transition-colors ${
+                      className={`h-8 min-w-14 rounded-lg border px-4 text-xs font-medium capitalize transition-colors ${
                         accommodationDetails.hostelFacilities === value
                           ? 'border-[#2475aa] bg-[#2475aa] text-white'
                           : 'border-[#d4a38d] bg-white text-[#ef6c20]'
@@ -620,7 +715,7 @@ export default function AddReviewPage() {
                       key={value}
                       type="button"
                       onClick={() => setAccommodationDetails(prev => ({ ...prev, outsideHostel: value }))}
-                      className={`h-6 min-w-11 rounded-lg border px-3 text-[10px] font-medium capitalize transition-colors ${
+                      className={`h-8 min-w-14 rounded-lg border px-4 text-xs font-medium capitalize transition-colors ${
                         accommodationDetails.outsideHostel === value
                           ? 'border-[#2475aa] bg-[#2475aa] text-white'
                           : 'border-[#d4a38d] bg-white text-[#ef6c20]'
@@ -632,12 +727,13 @@ export default function AddReviewPage() {
                 </div>
               </div>
 
-              <div className="relative pt-1">
+                <div className="relative pt-1">
                   <div className="flex items-center justify-between mb-3">
                     <label className="text-sm font-semibold text-gray-800">Hostel Rating <span className="text-red-500">*</span></label>
                     <button
                       type="button"
                       onClick={() => toggleQuestions('accommodation')}
+                      data-question-trigger="true"
                       className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#1d1c1c] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
                       title="View guiding questions"
                     >
@@ -650,8 +746,8 @@ export default function AddReviewPage() {
                   </div>
                   {expandedQuestions.accommodation && (
                     <div
-                      className="absolute right-0 top-10 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      onClick={() => toggleQuestions('accommodation')}
+                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                      data-question-panel="true"
                     >
                       <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
                         {FIELD_QUESTIONS.accommodation.map((question, idx) => (
@@ -676,6 +772,7 @@ export default function AddReviewPage() {
                   />
                   {validationErrors.accommodation && <p className="text-red-500 text-sm mt-1">{validationErrors.accommodation}</p>}
                 </div>
+              </>}
             </div>
             </div>}
           </div>
@@ -698,7 +795,7 @@ export default function AddReviewPage() {
             <div className="space-y-3">
               <div>
                 <label className="block text-sm font-medium text-gray-800 mb-1">Positives <span className="text-red-500">*</span></label>
-                {formData.pros.map((positive, index) => (
+                {false && formData.pros.map((positive, index) => (
                   <div key={index} className="flex gap-1.5 mb-2">
                     <input
                       type="text"
@@ -727,12 +824,23 @@ export default function AddReviewPage() {
                     )}
                   </div>
                 ))}
+                <div className="relative">
+                  <div className="flex min-h-24 flex-wrap content-start gap-2 rounded-xl border border-gray-400 p-2 focus-within:border-[#2475aa] focus-within:ring-1 focus-within:ring-[#2475aa]">
+                    {formData.pros.filter(Boolean).map((positive, index) => (
+                      <span key={positive} className="inline-flex h-7 items-center gap-1 rounded-md bg-[#e3eff6] px-2 text-xs font-medium text-black">
+                        {positive}<button data-suggestion-input="true" type="button" onClick={() => removeArrayItem('pros', index)} className="ml-1 text-base leading-none text-black hover:text-red-600" aria-label={`Remove ${positive}`}>&times;</button>
+                      </span>
+                    ))}
+                    <input data-suggestion-input="true" type="text" value={customTag.pros} onClick={() => setSuggestionField(prev => prev === 'pros' ? null : 'pros')} onChange={(e) => setCustomTag(prev => ({ ...prev, pros: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addReviewTag('pros', customTag.pros); } }} placeholder={formData.pros.filter(Boolean).length ? 'Add custom positive...' : 'Choose suggestions or type a custom positive...'} className="h-7 min-w-48 flex-1 bg-transparent px-1 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none" />
+                  </div>
+                  {suggestionField === 'pros' && <div className="absolute z-50 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"><div className="flex flex-wrap gap-1.5">{REVIEW_SUGGESTIONS.pros.map(suggestion => <button key={suggestion} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => addReviewTag('pros', suggestion)} className="rounded-full border border-[#cfe0eb] bg-[#e9f1f7] px-2.5 py-1 text-xs text-black hover:bg-[#e9f1f7]">{suggestion}</button>)}</div></div>}
+                </div>
                 {validationErrors.pros && <p className="text-red-500 text-sm mt-1">{validationErrors.pros}</p>}
               </div>
 
               <div>
                 <label className="block text-sm font-medium text-gray-800 mb-1">Negatives <span className="text-red-500">*</span></label>
-                {formData.cons.map((negative, index) => (
+                {false && formData.cons.map((negative, index) => (
                   <div key={index} className="flex gap-1.5 mb-2">
                     <input
                       type="text"
@@ -761,6 +869,17 @@ export default function AddReviewPage() {
                     )}
                   </div>
                 ))}
+                <div className="relative">
+                  <div className="flex min-h-24 flex-wrap content-start gap-2 rounded-xl border border-gray-400 p-2 focus-within:border-[#2475aa] focus-within:ring-1 focus-within:ring-[#2475aa]">
+                    {formData.cons.filter(Boolean).map((negative, index) => (
+                      <span key={negative} className="inline-flex h-7 items-center gap-1 rounded-md bg-red-100 px-2 text-xs font-medium text-red-800">
+                        {negative}<button data-suggestion-input="true" type="button" onClick={() => removeArrayItem('cons', index)} className="ml-1 text-base leading-none text-red-700 hover:text-red-900" aria-label={`Remove ${negative}`}>&times;</button>
+                      </span>
+                    ))}
+                    <input data-suggestion-input="true" type="text" value={customTag.cons} onClick={() => setSuggestionField(prev => prev === 'cons' ? null : 'cons')} onChange={(e) => setCustomTag(prev => ({ ...prev, cons: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addReviewTag('cons', customTag.cons); } }} placeholder={formData.cons.filter(Boolean).length ? 'Add custom negative...' : 'Choose suggestions or type a custom negative...'} className="h-7 min-w-48 flex-1 bg-transparent px-1 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none" />
+                  </div>
+                  {suggestionField === 'cons' && <div className="absolute z-50 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"><div className="flex flex-wrap gap-1.5">{REVIEW_SUGGESTIONS.cons.map(suggestion => <button key={suggestion} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => addReviewTag('cons', suggestion)} className="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs text-red-800 hover:bg-red-100">{suggestion}</button>)}</div></div>}
+                </div>
                 {validationErrors.cons && <p className="text-red-500 text-sm mt-1">{validationErrors.cons}</p>}
               </div>
 
@@ -811,9 +930,9 @@ export default function AddReviewPage() {
                 <div className="space-y-3">
                   <div>
                     <p className="text-sm font-medium text-gray-800 mb-2">Management or EAPCET Seat? <span className="text-red-500">*</span></p>
-                    <div className="grid grid-cols-2 gap-2">
+                    <div className="flex flex-wrap gap-2">
                       {[['management', 'Management'], ['eapcet', 'EAPCET']].map(([value, label]) => (
-                        <button key={value} type="button" onClick={() => setStudentInfo(prev => ({ ...prev, seatType: value }))} className={`h-8 rounded-xl border text-xs font-medium transition-colors ${studentInfo.seatType === value ? 'border-[#2475aa] bg-[#2475aa] text-white' : 'border-[#d4a38d] bg-white text-[#ef6c20]'}`}>
+                        <button key={value} type="button" onClick={() => setStudentInfo(prev => ({ ...prev, seatType: value }))} className={`h-9 w-32 rounded-xl border text-sm font-medium transition-colors ${studentInfo.seatType === value ? 'border-[#2475aa] bg-[#2475aa] text-white' : 'border-[#d4a38d] bg-white text-[#ef6c20]'}`}>
                           {label}
                         </button>
                       ))}
@@ -822,18 +941,20 @@ export default function AddReviewPage() {
 
                   <label className="block">
                     <span className="block text-sm font-medium text-gray-800 mb-1">EAPCET Rank <span className="text-red-500">*</span></span>
-                    <input type="text" value={studentInfo.eapcetRank} onChange={(e) => setStudentInfo(prev => ({ ...prev, eapcetRank: e.target.value }))} placeholder="eg : 5624" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                    <input type="text" value={studentInfo.eapcetRank} onChange={(e) => handleStudentInfoChange('eapcetRank', e.target.value)} placeholder="eg : 5624" className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.eapcetRank ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`} />
+                    {validationErrors.eapcetRank && <p className="text-red-500 text-sm mt-1">{validationErrors.eapcetRank}</p>}
                   </label>
 
                   <label className="block">
                     <span className="block text-sm font-medium text-gray-800 mb-1">College ID <span className="text-red-500">*</span></span>
-                    <input type="text" value={studentInfo.collegeId} onChange={(e) => setStudentInfo(prev => ({ ...prev, collegeId: e.target.value }))} placeholder="eg : 24B91xxxxx" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                    <input type="text" value={studentInfo.collegeId} onChange={(e) => handleStudentInfoChange('collegeId', e.target.value)} placeholder="eg : 24B91xxxxx" className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.collegeId ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`} />
+                    {validationErrors.collegeId && <p className="text-red-500 text-sm mt-1">{validationErrors.collegeId}</p>}
                   </label>
 
                   <div className="grid grid-cols-2 gap-2">
                     <label>
                       <span className="block text-sm font-medium text-gray-800 mb-1">Branch ? <span className="text-red-500">*</span></span>
-                      <select value={studentInfo.branch} onChange={(e) => setStudentInfo(prev => ({ ...prev, branch: e.target.value }))} className="w-full h-7 rounded-md border border-gray-400 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#2475aa]">
+                      <select value={studentInfo.branch} onChange={(e) => handleStudentInfoChange('branch', e.target.value)} className={`w-full h-10 rounded-lg border bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 ${validationErrors.branch ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`}>
                         <option value="">Select branch</option>
                         <option value="CSE">CSE</option>
                         <option value="CSE (AI & ML)">CSE (AI & ML)</option>
@@ -845,38 +966,43 @@ export default function AddReviewPage() {
                         <option value="Civil">Civil</option>
                         <option value="Other">Other</option>
                       </select>
+                      {validationErrors.branch && <p className="text-red-500 text-sm mt-1">{validationErrors.branch}</p>}
                     </label>
                     <label>
                       <span className="block text-sm font-medium text-gray-800 mb-1">Year ? <span className="text-red-500">*</span></span>
-                      <select value={studentInfo.year} onChange={(e) => setStudentInfo(prev => ({ ...prev, year: e.target.value }))} className="w-full h-7 rounded-md border border-gray-400 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#2475aa]">
+                      <select value={studentInfo.year} onChange={(e) => handleStudentInfoChange('year', e.target.value)} className={`w-full h-10 rounded-lg border bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 ${validationErrors.year ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`}>
                         <option value="">Select year</option>
                         <option value="1">1st year</option>
                         <option value="2">2nd year</option>
                         <option value="3">3rd year</option>
                         <option value="4">4th year</option>
                       </select>
+                      {validationErrors.year && <p className="text-red-500 text-sm mt-1">{validationErrors.year}</p>}
                     </label>
                   </div>
 
                   <label className="block">
                     <span className="block text-sm font-medium text-gray-800 mb-1">Batch ? <span className="text-red-500">*</span></span>
-                    <select value={studentInfo.batch} onChange={(e) => setStudentInfo(prev => ({ ...prev, batch: e.target.value }))} className="w-full h-7 rounded-md border border-gray-400 bg-white px-2 text-xs text-gray-700 focus:outline-none focus:ring-1 focus:ring-[#2475aa]">
+                    <select value={studentInfo.batch} onChange={(e) => handleStudentInfoChange('batch', e.target.value)} className={`w-full h-10 rounded-lg border bg-white px-3 text-sm text-gray-700 focus:outline-none focus:ring-1 ${validationErrors.batch ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`}>
                       <option value="">Select batch</option>
                       {Array.from({ length: 10 }, (_, index) => {
                         const startYear = 2020 + index;
                         return <option key={startYear} value={`${startYear} - ${startYear + 1}`}>{startYear} - {startYear + 1}</option>;
                       })}
                     </select>
+                    {validationErrors.batch && <p className="text-red-500 text-sm mt-1">{validationErrors.batch}</p>}
                   </label>
 
                   <label className="block">
                     <span className="block text-sm font-medium text-gray-800 mb-1">Instagram id ? <span className="text-red-500">*</span></span>
-                    <input type="text" value={studentInfo.instagramId} onChange={(e) => setStudentInfo(prev => ({ ...prev, instagramId: e.target.value }))} placeholder="eg : your_insta_id" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                    <input type="text" value={studentInfo.instagramId} onChange={(e) => handleStudentInfoChange('instagramId', e.target.value)} placeholder="eg : your_insta_id" className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.instagramId ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`} />
+                    {validationErrors.instagramId && <p className="text-red-500 text-sm mt-1">{validationErrors.instagramId}</p>}
                   </label>
 
                   <label className="block">
                     <span className="block text-sm font-medium text-gray-800 mb-1">Name ? <span className="text-red-500">*</span></span>
-                    <input type="text" value={studentInfo.name} onChange={(e) => setStudentInfo(prev => ({ ...prev, name: e.target.value }))} placeholder="eg : Johndeo" className="w-full h-7 rounded-md border border-gray-400 px-2 text-xs placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]" />
+                    <input type="text" value={studentInfo.name} onChange={(e) => handleStudentInfoChange('name', e.target.value)} placeholder="eg : Johndeo" className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.name ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`} />
+                    {validationErrors.name && <p className="text-red-500 text-sm mt-1">{validationErrors.name}</p>}
                   </label>
 
                   <button type="submit" disabled={isSubmitting} className="w-full h-9 rounded-lg bg-[#2475aa] text-xs font-medium text-white hover:bg-[#1e6493] disabled:cursor-not-allowed disabled:opacity-60">
