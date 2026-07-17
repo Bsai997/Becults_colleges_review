@@ -373,9 +373,9 @@ export default function AddReviewPage() {
 
         {/* Header */}
         <div className="mb-9 font-calsans"> 
-  <h1 className="text-4xl sm:text-6xl md:text-4xl font-bold text-[#1A699F]"> 
-    Say. <span className="text-[#121111]">What <br/>no one told you</span> <br /> 
-    <span className="text-[#D3540D]">before College Joining</span> 
+  <h1 className="text-4xl sm:text-6xl md:text-4xl font-extrabold text-[#1A699F]"> 
+    Say.<span className="text-[#121111] font-sans font-extrabold ">What<br/>no one told you</span><br/>
+    <span className="text-[#D3540D] font-sans font-extrabold ">before College Joining</span> 
   </h1> 
 </div>
 
