@@ -8,17 +8,18 @@ router.get('/colleges/top10', async (req, res) => {
   try {
     const { data, error } = await supabase
       .from('colleges')
-      .select('id, instcode, name, location, affiliation, created_at')
+      .select('id, instcode, name, location, affiliation') // Dropped created_at to shrink payload
+      .order('sno', { ascending: true })                  // Forces high-speed index usage
       .limit(10);
 
     if (error) throw error;
-
     res.json(data);
   } catch (error) {
     console.error('Error fetching top 10 colleges:', error);
     res.status(500).json({ error: error.message });
   }
 });
+
 
 // GET /api/colleges/search?q= - Search colleges by name
 router.get('/colleges/search', async (req, res) => {

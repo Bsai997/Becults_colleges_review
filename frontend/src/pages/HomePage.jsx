@@ -1,4 +1,4 @@
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useCallback } from 'react'; // Added useCallback
 import api from '../api/axios';
 import SearchBar from '../components/SearchBar';
 import CollegeCard from '../components/CollegeCard';
@@ -9,11 +9,8 @@ export default function HomePage() {
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState(null);
 
-  useEffect(() => {
-    fetchTop10Colleges();
-  }, []);
-
-  const fetchTop10Colleges = async () => {
+  // Memoized function prevents unnecessary component re-renders
+  const fetchTop10Colleges = useCallback(async () => {
     try {
       setIsLoading(true);
       const response = await api.get('/colleges/top10');
@@ -21,11 +18,15 @@ export default function HomePage() {
       setError(null);
     } catch (err) {
       console.error('Error fetching colleges:', err);
-      setError('Please refresh the page to Load the colleges.');
+      setError('Please refresh the page to load the colleges.');
     } finally {
       setIsLoading(false);
     }
-  };
+  }, []);
+
+  useEffect(() => {
+    fetchTop10Colleges();
+  }, [fetchTop10Colleges]);
 
   return (
     <div className="min-h-screen bg-[#eaf3fb] text-slate-900">
@@ -35,13 +36,12 @@ export default function HomePage() {
           <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 shadow-sm backdrop-blur">
             BECULTS
           </div>
-          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#1A699F] md:text-6xl">
-            College 
-            <span className="text-[#0e0f10] font-sans font-extrabold cd fr "> Reviews</span>
-            <span className="block text-slate-800">by <span className="text-[#ef6c20]">College Students</span></span>
+          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#1A699F] md:text-6xl"> 
+            College <span className="text-[#0e0f10] font-sans font-extrabold cd fr "> Reviews</span> 
+            <span className="block text-slate-800">by <span className="text-[#ef6c20]">College Students</span></span> 
           </h1>
-          <p className="mt-4 max-w-xl text-sm text-slate-600 md:text-base">
-            Search, compare, and open real student reviews in one place.
+          <p className="mt-4 max-w-xl text-sm text-slate-600 md:text-base"> 
+            Search, compare, and open real student reviews in one place. 
           </p>
         </div>
       </div>
@@ -55,7 +55,6 @@ export default function HomePage() {
       <div className="mx-auto max-w-4xl px-4 pb-12 md:pb-16">
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
-            {/* <h2 className="text-xl font-bold text-slate-900 md:text-2xl">Top Colleges</h2> */}
             <p className="mt-1 text-sm text-slate-600">The most reviewed colleges on the platform.</p>
           </div>
           <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
@@ -76,14 +75,12 @@ export default function HomePage() {
         ) : (
           <div className="space-y-4">
             {colleges.map((college, index) => (
-              <CollegeCard
-                key={college.id}
-                rank={index + 1}
-                id={college.id}
-                name={college.name}
-                location={college.location}
-                // average_rating={college.average_rating}
-                // total_reviews={college.total_reviews}
+              <CollegeCard 
+                key={college.id} 
+                rank={index + 1} 
+                id={college.id} 
+                name={college.name} 
+                location={college.location} 
               />
             ))}
           </div>
