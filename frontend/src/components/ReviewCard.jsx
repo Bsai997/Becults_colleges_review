@@ -25,7 +25,7 @@ const EXPANDABLE_SECTIONS = [
   ['faculty', 'Faculty'],
   ['placements', 'Placements'],
   ['tech_events', 'Events'],
-  ['infrastructure', 'Infrastructure and Sports'],
+  ['infrastructure', 'Infrastructure & Sports'],
   ['college_life', 'College life'],
   ['accommodation', 'Hostel life'],
 ];
