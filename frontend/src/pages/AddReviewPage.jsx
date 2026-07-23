@@ -58,19 +58,18 @@ const FIELD_QUESTIONS = {
 
 const REVIEW_SUGGESTIONS = {
   pros: [
-    'Good Placements', 'Friendly Faculty', 'Student Freedom', 'Internship Support',
+    'Good Placements', 'Supportive Faculty', 'Friendly Faculty', 'Internship Support',
     'Good Infrastructure', 'Good Hostel', 'Good Hostel Food', 'Strong Coding Culture',
     'Tech Fests', 'Cultural Fests', 'Active Clubs', 'Startup Support', 'Modern Labs',
-    'Good Library', 'Fast Wi-Fi', 'Cricket Ground', 'Basketball / Badminton Courts',
-    'Ragging Free', 'Good Canteen', 'Value for Money'
-  ],
+    'Good Library', 'Fast Wi-Fi', 'Sports Facilities', 'Clean Campus', 'Student Freedom', 'Flexible Attendance',
+    'Ragging Free', 'Good Canteen', 'Value for Money','Hackathons & workshops','Gym & Fitness Facilities','Helpful Seniors','Strong Alumni Network','Research Opportunities','Industry Exposure'],
   cons: [
     'Poor Placements', 'Strict Attendance', 'Strict Rules', 'Poor Hostel Food',
     'Poor Hostel', 'Poor Infrastructure', 'Unsupportive Faculty', 'Poor Teaching',
-    'Outdated Labs', 'Poor Wi-Fi', 'Limited Internships', 'No Startup Support',
+    'Outdated Labs', 'Poor Wi-Fi', 'Limited Events', 'No Startup Support',
     'Inactive Clubs', 'Fewer Tech Events', 'Poor Canteen', 'No Student Freedom',
-    'Long College Hours', 'Hidden Fees', 'Poor Management', 'Weak Coding Culture'
-  ]
+    'Long College Hours', 'Hidden Fees', 'Poor Management', 'Weak Coding Culture','Lack of Sports Facilities','Limited Internship Opportunities','Ragging Issues','Poor Alumni Network','Lack of Research Opportunities','Limited Industry Exposure','Less Practical Learning','Outdated Curriculum','No core Placements','Poor Campus Maintenance','Overcrowded Classrooms','Lack of Diversity','Limited Extracurricular Activities','Poor Career Guidance','Inadequate Library Resources'],
+  
 };
 
 export default function AddReviewPage() {
@@ -372,17 +371,20 @@ export default function AddReviewPage() {
         )}
 
         {/* Header */}
-        <div className="mb-9 font-calsans"> 
-  <h1 className="text-4xl sm:text-5xl md:text-3xl font-extrabold text-[#1A699F]"> 
-    Say,<span className="text-[#121111] font-sans font-extrabold ">What<br/></span>
-    <span className="text-[#1c1c1b] font-sans font-extrabold cd fr ">No one told You </span>
-    <span className="text-[#1A699F] font-sans font-extrabold ">before</span> 
-    <span className="text-[#D3540D] font-sans font-extrabold cd fr "> College Joining</span>
-  </h1> 
-</div>
+        <div className="mb-9 font-calsans">
+          <h1 className="text-4xl sm:text-5xl md:text-3xl font-extrabold text-[#1A699F]">
+            Say,<span className="text-[#121111] font-sans font-extrabold ">What<br /></span>
+            <span className="text-[#1c1c1b] font-sans font-extrabold cd fr ">No one told You </span>
+            <span className="text-[#1A699F] font-sans font-extrabold ">before</span>
+            <span className="text-[#D3540D] font-sans font-extrabold cd fr "> College Joining</span>
+          </h1>
+
+        </div>
+        <h1 className="mb-5 text-3xl font-extrabold leading-tight text-[#1e1f20] sm:text-1xl font-sans">
+          {college.name}
+        </h1>
 
 
-        
 
         {/* Form - Block 1: Give Your Honest Review */}
         <form
@@ -392,7 +394,269 @@ export default function AddReviewPage() {
           }}
           className="space-y-4"
         >
-          {/* BLOCK 1: Give Your Honest Review */}
+          {/* BLOCK 1: What Every Junior Should Know */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <button
+              type="button"
+              onClick={() => toggleBlock('juniorAdvice')}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900">What Every Junior Should Know</h3>
+              <ChevronDown
+                size={22}
+                className={`text-gray-600 transition-transform ${expandedBlocks.juniorAdvice ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {expandedBlocks.juniorAdvice && <div className="border-t border-gray-200 p-5 sm:p-6">
+              <div className="space-y-3">
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Positives <span className="text-red-500">*</span></label>
+                  {false && formData.pros.map((positive, index) => (
+                    <div key={index} className="flex gap-1.5 mb-2">
+                      <input
+                        type="text"
+                        value={positive}
+                        onChange={(e) => handleArrayChange('pros', index, e.target.value)}
+                        placeholder="Custom..."
+                        className="min-w-0 flex-1 h-7 rounded-md border border-gray-400 px-2 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem('pros', index)}
+                        className="h-7 w-7 rounded-md border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50"
+                        aria-label={`Delete positive ${index + 1}`}
+                        title="Delete positive"
+                      >
+                        ×
+                      </button>
+                      {index === formData.pros.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={() => addArrayItem('pros')}
+                          className="h-7 rounded-md bg-[#2475aa] px-3 text-xs font-medium text-white hover:bg-[#1e6493]"
+                        >
+                          + Add
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <div className="relative">
+                    <div className="flex min-h-24 flex-wrap content-start gap-2 rounded-xl border border-gray-400 p-2 focus-within:border-[#2475aa] focus-within:ring-1 focus-within:ring-[#2475aa]">
+                      {formData.pros.filter(Boolean).map((positive, index) => (
+                        <span key={positive} className="inline-flex h-7 items-center gap-1 rounded-md bg-[#e3eff6] px-2 text-xs font-medium text-black">
+                          {positive}<button data-suggestion-input="true" type="button" onClick={() => removeArrayItem('pros', index)} className="ml-1 text-base leading-none text-black hover:text-red-600" aria-label={`Remove ${positive}`}>&times;</button>
+                        </span>
+                      ))}
+                      <input data-suggestion-input="true" type="text" value={customTag.pros} onClick={() => setSuggestionField(prev => prev === 'pros' ? null : 'pros')} onChange={(e) => setCustomTag(prev => ({ ...prev, pros: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addReviewTag('pros', customTag.pros); } }} placeholder={formData.pros.filter(Boolean).length ? 'Add custom positive...' : 'Choose suggestions or type a custom positive...'} className="h-7 min-w-48 flex-1 bg-transparent px-1 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none" />
+                    </div>
+                    {suggestionField === 'pros' && <div className="absolute z-50 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"><div className="flex flex-wrap gap-1.5">{REVIEW_SUGGESTIONS.pros.map(suggestion => <button key={suggestion} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => addReviewTag('pros', suggestion)} className="rounded-full border border-[#cfe0eb] bg-[#e9f1f7] px-2.5 py-1 text-xs text-black hover:bg-[#e9f1f7]">{suggestion}</button>)}</div></div>}
+                  </div>
+                  {validationErrors.pros && <p className="text-red-500 text-sm mt-1">{validationErrors.pros}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Negatives <span className="text-red-500">*</span></label>
+                  {false && formData.cons.map((negative, index) => (
+                    <div key={index} className="flex gap-1.5 mb-2">
+                      <input
+                        type="text"
+                        value={negative}
+                        onChange={(e) => handleArrayChange('cons', index, e.target.value)}
+                        placeholder="Custom..."
+                        className="min-w-0 flex-1 h-7 rounded-md border border-gray-400 px-2 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]"
+                      />
+                      <button
+                        type="button"
+                        onClick={() => removeArrayItem('cons', index)}
+                        className="h-7 w-7 rounded-md border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50"
+                        aria-label={`Delete negative ${index + 1}`}
+                        title="Delete negative"
+                      >
+                        ×
+                      </button>
+                      {index === formData.cons.length - 1 && (
+                        <button
+                          type="button"
+                          onClick={() => addArrayItem('cons')}
+                          className="h-7 rounded-md bg-[#2475aa] px-3 text-xs font-medium text-white hover:bg-[#1e6493]"
+                        >
+                          + Add
+                        </button>
+                      )}
+                    </div>
+                  ))}
+                  <div className="relative">
+                    <div className="flex min-h-24 flex-wrap content-start gap-2 rounded-xl border border-gray-400 p-2 focus-within:border-[#2475aa] focus-within:ring-1 focus-within:ring-[#2475aa]">
+                      {formData.cons.filter(Boolean).map((negative, index) => (
+                        <span key={negative} className="inline-flex h-7 items-center gap-1 rounded-md bg-red-100 px-2 text-xs font-medium text-red-800">
+                          {negative}<button data-suggestion-input="true" type="button" onClick={() => removeArrayItem('cons', index)} className="ml-1 text-base leading-none text-red-700 hover:text-red-900" aria-label={`Remove ${negative}`}>&times;</button>
+                        </span>
+                      ))}
+                      <input data-suggestion-input="true" type="text" value={customTag.cons} onClick={() => setSuggestionField(prev => prev === 'cons' ? null : 'cons')} onChange={(e) => setCustomTag(prev => ({ ...prev, cons: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addReviewTag('cons', customTag.cons); } }} placeholder={formData.cons.filter(Boolean).length ? 'Add custom negative...' : 'Choose suggestions or type a custom negative...'} className="h-7 min-w-48 flex-1 bg-transparent px-1 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none" />
+                    </div>
+                    {suggestionField === 'cons' && <div className="absolute z-50 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"><div className="flex flex-wrap gap-1.5">{REVIEW_SUGGESTIONS.cons.map(suggestion => <button key={suggestion} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => addReviewTag('cons', suggestion)} className="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs text-red-800 hover:bg-red-100">{suggestion}</button>)}</div></div>}
+                  </div>
+                  {validationErrors.cons && <p className="text-red-500 text-sm mt-1">{validationErrors.cons}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Advice To Juniors <span className="text-red-500">*</span></label>
+                  <textarea
+                    value={formData.advice_to_juniors}
+                    onChange={(e) => handleInputChange('advice_to_juniors', e.target.value)}
+                    placeholder="What advice would you give juniors?"
+                    rows="3"
+                    className={`w-full resize-none rounded-xl border px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.advice_to_juniors ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'
+                      }`}
+                  />
+                  {validationErrors.advice_to_juniors && <p className="text-red-500 text-sm mt-1">{validationErrors.advice_to_juniors}</p>}
+                </div>
+
+                <div>
+                  <label className="block text-sm font-medium text-gray-800 mb-1">Overall About the College <span className="text-red-500">*</span></label>
+                  <textarea
+                    value={formData.overall_about_college}
+                    onChange={(e) => handleInputChange('overall_about_college', e.target.value)}
+                    placeholder="Help your brothers & sisters make the right choice."
+                    rows="3"
+                    className={`w-full resize-none rounded-xl border px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.overall_about_college ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'
+                      }`}
+                  />
+                  {validationErrors.overall_about_college && <p className="text-red-500 text-sm mt-1">{validationErrors.overall_about_college}</p>}
+                </div>
+              </div>
+            </div>}
+          </div>
+
+
+          {/* BLOCK 2: Accommodation */}
+          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
+            <button
+              type="button"
+              onClick={() => toggleBlock('accommodation')}
+              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
+            >
+              <h3 className="text-lg font-bold text-gray-900">Accommodation</h3>
+              <ChevronDown
+                size={22}
+                className={`text-gray-600 transition-transform ${expandedBlocks.accommodation ? 'rotate-180' : ''}`}
+              />
+            </button>
+
+            {expandedBlocks.accommodation && <div className="border-t border-gray-200 p-5 sm:p-6">
+              <div className="space-y-3">
+                <div>
+                  <p className="text-sm font-medium text-gray-800 mb-2">Are you a Hosteller or Day Scholar? <span className="text-red-500">*</span></p>
+                  <div className="flex max-w-sm gap-2">
+                    {[
+                      ['dayScholar', 'Day Scholar'],
+                      ['hosteller', 'Hosteller']
+                    ].map(([value, label]) => (
+                      <button
+                        key={value}
+                        type="button"
+                        onClick={() => setAccommodationDetails(prev => ({ ...prev, studentType: value }))}
+                        className={`h-10 w-36 rounded-xl border text-xs font-medium transition-colors ${accommodationDetails.studentType === value
+                            ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                            : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                          }`}
+                      >
+                        {label}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {accommodationDetails.studentType === 'hosteller' && <>
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 mb-2">College hostel facilities available?</p>
+                    <div className="flex gap-2">
+                      {['yes', 'no'].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setAccommodationDetails(prev => ({ ...prev, hostelFacilities: value }))}
+                          className={`h-8 min-w-14 rounded-lg border px-4 text-xs font-medium capitalize transition-colors ${accommodationDetails.hostelFacilities === value
+                              ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                              : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                            }`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div>
+                    <p className="text-sm font-medium text-gray-800 mb-2">Staying in outside hostel?</p>
+                    <div className="flex gap-2">
+                      {['yes', 'no'].map((value) => (
+                        <button
+                          key={value}
+                          type="button"
+                          onClick={() => setAccommodationDetails(prev => ({ ...prev, outsideHostel: value }))}
+                          className={`h-8 min-w-14 rounded-lg border px-4 text-xs font-medium capitalize transition-colors ${accommodationDetails.outsideHostel === value
+                              ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                              : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                            }`}
+                        >
+                          {value}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+
+                  <div className="relative pt-1">
+                    <div className="flex items-center justify-between mb-3">
+                      <label className="text-sm font-semibold text-gray-800">Hostel Rating <span className="text-red-500">*</span></label>
+                      <button
+                        type="button"
+                        onClick={() => toggleQuestions('accommodation')}
+                        data-question-trigger="true"
+                        className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#1d1c1c] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
+                        title="View guiding questions"
+                      >
+                        <span>Q's</span>
+                        <ChevronDown
+                          size={12}
+                          className={`transition-transform ${expandedQuestions.accommodation ? 'rotate-180' : ''}`}
+                        />
+                      </button>
+                    </div>
+                    {expandedQuestions.accommodation && (
+                      <div
+                        className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
+                        data-question-panel="true"
+                      >
+                        <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
+                          {FIELD_QUESTIONS.accommodation.map((question, idx) => (
+                            <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
+                              <div className="flex gap-2">
+                                <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
+                                <p className="text-gray-900">{question}</p>
+                              </div>
+                            </div>
+                          ))}
+                        </div>
+                      </div>
+                    )}
+                    <textarea
+                      placeholder="Share your honest hostel experience."
+                      value={formData.accommodation}
+                      onChange={(e) => setFormData(prev => ({ ...prev, accommodation: e.target.value }))}
+                      className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${validationErrors.accommodation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#ef6c20]'
+                        }`}
+                      rows="3"
+                    />
+                    {validationErrors.accommodation && <p className="text-red-500 text-sm mt-1">{validationErrors.accommodation}</p>}
+                  </div>
+                </>}
+              </div>
+            </div>}
+          </div>
+
+          {/* BLOCK 3: Give Your Honest Review */}
           <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
             {/* Block Header - Expandable */}
             <button
@@ -410,7 +674,7 @@ export default function AddReviewPage() {
             {/* Block Content - Expandable Ratings */}
             {expandedBlocks.honestReview && (
               <div className="border-t border-gray-200 p-6 space-y-6 bg-white">
-                
+
                 {/* Faculty */}
                 <div className="relative">
                   <div className="flex items-center justify-between mb-3">
@@ -449,10 +713,9 @@ export default function AddReviewPage() {
                   <textarea
                     placeholder="Tell everything about your faculty experience."
                     value={formData.faculty}
-                    onChange={(e) => setFormData(prev => ({...prev, faculty: e.target.value}))}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
-                      validationErrors.faculty ? 'border-black focus:ring-black' : 'border-gray-300 focus:ring-[#8b8989]'
-                    }`}
+                    onChange={(e) => setFormData(prev => ({ ...prev, faculty: e.target.value }))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${validationErrors.faculty ? 'border-black focus:ring-black' : 'border-gray-300 focus:ring-[#8b8989]'
+                      }`}
                     rows="3"
                   />
                   {validationErrors.faculty && <p className="text-red-500 text-sm mt-1">{validationErrors.faculty}</p>}
@@ -477,7 +740,7 @@ export default function AddReviewPage() {
                     </button>
                   </div>
                   {expandedQuestions.placements && (
-                    <div 
+                    <div
                       className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
                       data-question-panel="true"
                     >
@@ -496,10 +759,9 @@ export default function AddReviewPage() {
                   <textarea
                     placeholder="Tell the real placement story here."
                     value={formData.placements}
-                    onChange={(e) => setFormData(prev => ({...prev, placements: e.target.value}))}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
-                      validationErrors.placements ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
-                    }`}
+                    onChange={(e) => setFormData(prev => ({ ...prev, placements: e.target.value }))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${validationErrors.placements ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                      }`}
                     rows="3"
                   />
                   {validationErrors.placements && <p className="text-red-500 text-sm mt-1">{validationErrors.placements}</p>}
@@ -524,7 +786,7 @@ export default function AddReviewPage() {
                     </button>
                   </div>
                   {expandedQuestions.techEvents && (
-                    <div 
+                    <div
                       className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
                       data-question-panel="true"
                     >
@@ -543,10 +805,9 @@ export default function AddReviewPage() {
                   <textarea
                     placeholder="Share your event and club experience."
                     value={formData.techEvents}
-                    onChange={(e) => setFormData(prev => ({...prev, techEvents: e.target.value}))}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
-                      validationErrors.techEvents ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
-                    }`}
+                    onChange={(e) => setFormData(prev => ({ ...prev, techEvents: e.target.value }))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${validationErrors.techEvents ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                      }`}
                     rows="3"
                   />
                   {validationErrors.techEvents && <p className="text-red-500 text-sm mt-1">{validationErrors.techEvents}</p>}
@@ -571,7 +832,7 @@ export default function AddReviewPage() {
                     </button>
                   </div>
                   {expandedQuestions.infrastructure && (
-                    <div 
+                    <div
                       className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
                       data-question-panel="true"
                     >
@@ -590,10 +851,9 @@ export default function AddReviewPage() {
                   <textarea
                     placeholder="Tell everything about campus facilities."
                     value={formData.infrastructure}
-                    onChange={(e) => setFormData(prev => ({...prev, infrastructure: e.target.value}))}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
-                      validationErrors.infrastructure ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
-                    }`}
+                    onChange={(e) => setFormData(prev => ({ ...prev, infrastructure: e.target.value }))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${validationErrors.infrastructure ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                      }`}
                     rows="3"
                   />
                   {validationErrors.infrastructure && <p className="text-red-500 text-sm mt-1">{validationErrors.infrastructure}</p>}
@@ -618,7 +878,7 @@ export default function AddReviewPage() {
                     </button>
                   </div>
                   {expandedQuestions.collegeLife && (
-                    <div 
+                    <div
                       className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
                       data-question-panel="true"
                     >
@@ -637,283 +897,15 @@ export default function AddReviewPage() {
                   <textarea
                     placeholder="Describe your complete college life experience."
                     value={formData.collegeLife}
-                    onChange={(e) => setFormData(prev => ({...prev, collegeLife: e.target.value}))}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
-                      validationErrors.collegeLife ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
-                    }`}
+                    onChange={(e) => setFormData(prev => ({ ...prev, collegeLife: e.target.value }))}
+                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${validationErrors.collegeLife ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#8b8989]'
+                      }`}
                     rows="3"
                   />
                   {validationErrors.collegeLife && <p className="text-red-500 text-sm mt-1">{validationErrors.collegeLife}</p>}
                 </div>
               </div>
             )}
-          </div>
-
-          {/* BLOCK 2: Accommodation */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
-            <button
-              type="button"
-              onClick={() => toggleBlock('accommodation')}
-              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
-            >
-              <h3 className="text-lg font-bold text-gray-900">Accommodation</h3>
-              <ChevronDown
-                size={22}
-                className={`text-gray-600 transition-transform ${expandedBlocks.accommodation ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            {expandedBlocks.accommodation && <div className="border-t border-gray-200 p-5 sm:p-6">
-            <div className="space-y-3">
-              <div>
-                <p className="text-sm font-medium text-gray-800 mb-2">Are you a Hosteller or Day Scholar? <span className="text-red-500">*</span></p>
-                <div className="flex max-w-sm gap-2">
-                  {[
-                    ['dayScholar', 'Day Scholar'],
-                    ['hosteller', 'Hosteller']
-                  ].map(([value, label]) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setAccommodationDetails(prev => ({ ...prev, studentType: value }))}
-                      className={`h-10 w-36 rounded-xl border text-xs font-medium transition-colors ${
-                        accommodationDetails.studentType === value
-                          ? 'border-[#2475aa] bg-[#2475aa] text-white'
-                          : 'border-[#d4a38d] bg-white text-[#ef6c20]'
-                      }`}
-                    >
-                      {label}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              {accommodationDetails.studentType === 'hosteller' && <>
-              <div>
-                <p className="text-sm font-medium text-gray-800 mb-2">College hostel facilities available?</p>
-                <div className="flex gap-2">
-                  {['yes', 'no'].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setAccommodationDetails(prev => ({ ...prev, hostelFacilities: value }))}
-                      className={`h-8 min-w-14 rounded-lg border px-4 text-xs font-medium capitalize transition-colors ${
-                        accommodationDetails.hostelFacilities === value
-                          ? 'border-[#2475aa] bg-[#2475aa] text-white'
-                          : 'border-[#d4a38d] bg-white text-[#ef6c20]'
-                      }`}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-              <div>
-                <p className="text-sm font-medium text-gray-800 mb-2">Staying in outside hostel?</p>
-                <div className="flex gap-2">
-                  {['yes', 'no'].map((value) => (
-                    <button
-                      key={value}
-                      type="button"
-                      onClick={() => setAccommodationDetails(prev => ({ ...prev, outsideHostel: value }))}
-                      className={`h-8 min-w-14 rounded-lg border px-4 text-xs font-medium capitalize transition-colors ${
-                        accommodationDetails.outsideHostel === value
-                          ? 'border-[#2475aa] bg-[#2475aa] text-white'
-                          : 'border-[#d4a38d] bg-white text-[#ef6c20]'
-                      }`}
-                    >
-                      {value}
-                    </button>
-                  ))}
-                </div>
-              </div>
-
-                <div className="relative pt-1">
-                  <div className="flex items-center justify-between mb-3">
-                    <label className="text-sm font-semibold text-gray-800">Hostel Rating <span className="text-red-500">*</span></label>
-                    <button
-                      type="button"
-                      onClick={() => toggleQuestions('accommodation')}
-                      data-question-trigger="true"
-                      className="w-10 h-4 px-1 py-0 rounded-[6px] bg-[#D9D9D9] text-[#1d1c1c] hover:opacity-80 transition-opacity flex items-center justify-center text-xs font-semibold gap-1"
-                      title="View guiding questions"
-                    >
-                      <span>Q's</span>
-                      <ChevronDown
-                        size={12}
-                        className={`transition-transform ${expandedQuestions.accommodation ? 'rotate-180' : ''}`}
-                      />
-                    </button>
-                  </div>
-                  {expandedQuestions.accommodation && (
-                    <div
-                      className="absolute right-4 top-7 z-50 bg-white border-2 border-gray-300 rounded-xl shadow-2xl p-4 w-80"
-                      data-question-panel="true"
-                    >
-                      <div className="space-y-2 text-sm max-h-64 overflow-y-auto">
-                        {FIELD_QUESTIONS.accommodation.map((question, idx) => (
-                          <div key={idx} className="bg-white border border-gray-200 rounded-lg p-3">
-                            <div className="flex gap-2">
-                              <span className="text-gray-600 font-bold flex-shrink-0">{idx + 1}.</span>
-                              <p className="text-gray-900">{question}</p>
-                            </div>
-                          </div>
-                        ))}
-                      </div>
-                    </div>
-                  )}
-                  <textarea
-                    placeholder="Share your honest hostel experience."
-                    value={formData.accommodation}
-                    onChange={(e) => setFormData(prev => ({...prev, accommodation: e.target.value}))}
-                    className={`w-full px-4 py-3 border rounded-lg focus:outline-none focus:ring-2 focus:border-transparent resize-none ${
-                      validationErrors.accommodation ? 'border-red-500 focus:ring-red-500' : 'border-gray-300 focus:ring-[#ef6c20]'
-                    }`}
-                    rows="3"
-                  />
-                  {validationErrors.accommodation && <p className="text-red-500 text-sm mt-1">{validationErrors.accommodation}</p>}
-                </div>
-              </>}
-            </div>
-            </div>}
-          </div>
-
-          {/* BLOCK 3: What Every Junior Should Know */}
-          <div className="bg-white rounded-2xl shadow-sm overflow-hidden border border-gray-200">
-            <button
-              type="button"
-              onClick={() => toggleBlock('juniorAdvice')}
-              className="w-full flex items-center justify-between px-5 py-4 text-left hover:bg-gray-50 transition-colors sm:px-6"
-            >
-              <h3 className="text-lg font-bold text-gray-900">What Every Junior Should Know</h3>
-              <ChevronDown
-                size={22}
-                className={`text-gray-600 transition-transform ${expandedBlocks.juniorAdvice ? 'rotate-180' : ''}`}
-              />
-            </button>
-
-            {expandedBlocks.juniorAdvice && <div className="border-t border-gray-200 p-5 sm:p-6">
-            <div className="space-y-3">
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-1">Positives <span className="text-red-500">*</span></label>
-                {false && formData.pros.map((positive, index) => (
-                  <div key={index} className="flex gap-1.5 mb-2">
-                    <input
-                      type="text"
-                      value={positive}
-                      onChange={(e) => handleArrayChange('pros', index, e.target.value)}
-                      placeholder="Custom..."
-                      className="min-w-0 flex-1 h-7 rounded-md border border-gray-400 px-2 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeArrayItem('pros', index)}
-                      className="h-7 w-7 rounded-md border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50"
-                      aria-label={`Delete positive ${index + 1}`}
-                      title="Delete positive"
-                    >
-                      ×
-                    </button>
-                    {index === formData.pros.length - 1 && (
-                      <button
-                        type="button"
-                        onClick={() => addArrayItem('pros')}
-                        className="h-7 rounded-md bg-[#2475aa] px-3 text-xs font-medium text-white hover:bg-[#1e6493]"
-                      >
-                        + Add
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <div className="relative">
-                  <div className="flex min-h-24 flex-wrap content-start gap-2 rounded-xl border border-gray-400 p-2 focus-within:border-[#2475aa] focus-within:ring-1 focus-within:ring-[#2475aa]">
-                    {formData.pros.filter(Boolean).map((positive, index) => (
-                      <span key={positive} className="inline-flex h-7 items-center gap-1 rounded-md bg-[#e3eff6] px-2 text-xs font-medium text-black">
-                        {positive}<button data-suggestion-input="true" type="button" onClick={() => removeArrayItem('pros', index)} className="ml-1 text-base leading-none text-black hover:text-red-600" aria-label={`Remove ${positive}`}>&times;</button>
-                      </span>
-                    ))}
-                    <input data-suggestion-input="true" type="text" value={customTag.pros} onClick={() => setSuggestionField(prev => prev === 'pros' ? null : 'pros')} onChange={(e) => setCustomTag(prev => ({ ...prev, pros: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addReviewTag('pros', customTag.pros); } }} placeholder={formData.pros.filter(Boolean).length ? 'Add custom positive...' : 'Choose suggestions or type a custom positive...'} className="h-7 min-w-48 flex-1 bg-transparent px-1 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none" />
-                  </div>
-                  {suggestionField === 'pros' && <div className="absolute z-50 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"><div className="flex flex-wrap gap-1.5">{REVIEW_SUGGESTIONS.pros.map(suggestion => <button key={suggestion} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => addReviewTag('pros', suggestion)} className="rounded-full border border-[#cfe0eb] bg-[#e9f1f7] px-2.5 py-1 text-xs text-black hover:bg-[#e9f1f7]">{suggestion}</button>)}</div></div>}
-                </div>
-                {validationErrors.pros && <p className="text-red-500 text-sm mt-1">{validationErrors.pros}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-1">Negatives <span className="text-red-500">*</span></label>
-                {false && formData.cons.map((negative, index) => (
-                  <div key={index} className="flex gap-1.5 mb-2">
-                    <input
-                      type="text"
-                      value={negative}
-                      onChange={(e) => handleArrayChange('cons', index, e.target.value)}
-                      placeholder="Custom..."
-                      className="min-w-0 flex-1 h-7 rounded-md border border-gray-400 px-2 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 focus:ring-[#2475aa]"
-                    />
-                    <button
-                      type="button"
-                      onClick={() => removeArrayItem('cons', index)}
-                      className="h-7 w-7 rounded-md border border-red-200 text-sm font-semibold text-red-500 hover:bg-red-50"
-                      aria-label={`Delete negative ${index + 1}`}
-                      title="Delete negative"
-                    >
-                      ×
-                    </button>
-                    {index === formData.cons.length - 1 && (
-                      <button
-                        type="button"
-                        onClick={() => addArrayItem('cons')}
-                        className="h-7 rounded-md bg-[#2475aa] px-3 text-xs font-medium text-white hover:bg-[#1e6493]"
-                      >
-                        + Add
-                      </button>
-                    )}
-                  </div>
-                ))}
-                <div className="relative">
-                  <div className="flex min-h-24 flex-wrap content-start gap-2 rounded-xl border border-gray-400 p-2 focus-within:border-[#2475aa] focus-within:ring-1 focus-within:ring-[#2475aa]">
-                    {formData.cons.filter(Boolean).map((negative, index) => (
-                      <span key={negative} className="inline-flex h-7 items-center gap-1 rounded-md bg-red-100 px-2 text-xs font-medium text-red-800">
-                        {negative}<button data-suggestion-input="true" type="button" onClick={() => removeArrayItem('cons', index)} className="ml-1 text-base leading-none text-red-700 hover:text-red-900" aria-label={`Remove ${negative}`}>&times;</button>
-                      </span>
-                    ))}
-                    <input data-suggestion-input="true" type="text" value={customTag.cons} onClick={() => setSuggestionField(prev => prev === 'cons' ? null : 'cons')} onChange={(e) => setCustomTag(prev => ({ ...prev, cons: e.target.value }))} onKeyDown={(e) => { if (e.key === 'Enter') { e.preventDefault(); addReviewTag('cons', customTag.cons); } }} placeholder={formData.cons.filter(Boolean).length ? 'Add custom negative...' : 'Choose suggestions or type a custom negative...'} className="h-7 min-w-48 flex-1 bg-transparent px-1 text-xs text-gray-800 placeholder:text-gray-400 focus:outline-none" />
-                  </div>
-                  {suggestionField === 'cons' && <div className="absolute z-50 mt-1 max-h-44 w-full overflow-y-auto rounded-xl border border-gray-200 bg-white p-2 shadow-lg"><div className="flex flex-wrap gap-1.5">{REVIEW_SUGGESTIONS.cons.map(suggestion => <button key={suggestion} type="button" onMouseDown={(e) => e.preventDefault()} onClick={() => addReviewTag('cons', suggestion)} className="rounded-full border border-red-200 bg-red-50 px-2.5 py-1 text-xs text-red-800 hover:bg-red-100">{suggestion}</button>)}</div></div>}
-                </div>
-                {validationErrors.cons && <p className="text-red-500 text-sm mt-1">{validationErrors.cons}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-1">Advice To Juniors <span className="text-red-500">*</span></label>
-                <textarea
-                  value={formData.advice_to_juniors}
-                  onChange={(e) => handleInputChange('advice_to_juniors', e.target.value)}
-                  placeholder="What advice would you give juniors?"
-                  rows="3"
-                  className={`w-full resize-none rounded-xl border px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 ${
-                    validationErrors.advice_to_juniors ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'
-                  }`}
-                />
-                {validationErrors.advice_to_juniors && <p className="text-red-500 text-sm mt-1">{validationErrors.advice_to_juniors}</p>}
-              </div>
-
-              <div>
-                <label className="block text-sm font-medium text-gray-800 mb-1">Overall About the College <span className="text-red-500">*</span></label>
-                <textarea
-                  value={formData.overall_about_college}
-                  onChange={(e) => handleInputChange('overall_about_college', e.target.value)}
-                  placeholder="Help your brothers & sisters make the right choice."
-                  rows="3"
-                  className={`w-full resize-none rounded-xl border px-3 py-2 text-sm text-gray-800 placeholder:text-gray-400 focus:outline-none focus:ring-1 ${
-                    validationErrors.overall_about_college ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'
-                  }`}
-                />
-                {validationErrors.overall_about_college && <p className="text-red-500 text-sm mt-1">{validationErrors.overall_about_college}</p>}
-              </div>
-            </div>
-            </div>}
           </div>
 
           {/* BLOCK 4: Student Information */}
@@ -930,22 +922,75 @@ export default function AddReviewPage() {
             {expandedBlocks.studentInformation && (
               <div className="border-t border-gray-200 p-5 sm:p-6">
                 <div className="space-y-3">
-                  <div>
-                    <p className="text-sm font-medium text-gray-800 mb-2">Management or EAPCET Seat? <span className="text-red-500">*</span></p>
-                    <div className="flex flex-wrap gap-2">
-                      {[['management', 'Management'], ['eapcet', 'EAPCET']].map(([value, label]) => (
-                        <button key={value} type="button" onClick={() => setStudentInfo(prev => ({ ...prev, seatType: value }))} className={`h-9 w-32 rounded-xl border text-sm font-medium transition-colors ${studentInfo.seatType === value ? 'border-[#2475aa] bg-[#2475aa] text-white' : 'border-[#d4a38d] bg-white text-[#ef6c20]'}`}>
-                          {label}
-                        </button>
-                      ))}
+                  <div className="space-y-3">
+                    <div>
+                      <p className="text-sm font-medium text-gray-800 mb-2">
+                        Management or EAPCET Seat? <span className="text-red-500">*</span>
+                      </p>
+                      <div className="flex flex-wrap gap-2">
+                        {[
+                          ['management', 'Management'],
+                          ['eapcet', 'EAPCET'],
+                        ].map(([value, label]) => (
+                          <button
+                            key={value}
+                            type="button"
+                            onClick={() => setStudentInfo((prev) => ({ ...prev, seatType: value }))}
+                            className={`h-9 w-32 rounded-xl border text-sm font-medium transition-colors ${studentInfo.seatType === value
+                                ? 'border-[#2475aa] bg-[#2475aa] text-white'
+                                : 'border-[#d4a38d] bg-white text-[#ef6c20]'
+                              }`}
+                          >
+                            {label}
+                          </button>
+                        ))}
+                      </div>
                     </div>
-                  </div>
 
-                  <label className="block">
-                    <span className="block text-sm font-medium text-gray-800 mb-1">EAPCET Rank <span className="text-red-500">*</span></span>
-                    <input type="text" value={studentInfo.eapcetRank} onChange={(e) => handleStudentInfoChange('eapcetRank', e.target.value)} placeholder="eg : 5624" className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors.eapcetRank ? 'border-red-500 focus:ring-red-500' : 'border-gray-400 focus:ring-[#2475aa]'}`} />
-                    {validationErrors.eapcetRank && <p className="text-red-500 text-sm mt-1">{validationErrors.eapcetRank}</p>}
-                  </label>
+                    {/* Render EAPCET Rank Field */}
+                    {studentInfo.seatType === 'eapcet' && (
+                      <label className="block">
+                        <span className="block text-sm font-medium text-gray-800 mb-1">
+                          EAPCET Rank <span className="text-red-500">*</span>
+                        </span>
+                        <input
+                          type="text"
+                          value={studentInfo.eapcetRank || ''}
+                          onChange={(e) => handleStudentInfoChange('eapcetRank', e.target.value)}
+                          placeholder="eg : 5624"
+                          className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors?.eapcetRank
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-400 focus:ring-[#2475aa]'
+                            }`}
+                        />
+                        {validationErrors?.eapcetRank && (
+                          <p className="text-red-500 text-sm mt-1">{validationErrors.eapcetRank}</p>
+                        )}
+                      </label>
+                    )}
+
+                    {/* Render College Fee Field */}
+                    {studentInfo.seatType === 'management' && (
+                      <label className="block">
+                        <span className="block text-sm font-medium text-gray-800 mb-1">
+                          College Fee <span className="text-red-500">*</span>
+                        </span>
+                        <input
+                          type="text"
+                          value={studentInfo.collegeFee || ''}
+                          onChange={(e) => handleStudentInfoChange('collegeFee', e.target.value)}
+                          placeholder="eg : 85000"
+                          className={`w-full h-10 rounded-lg border px-3 text-sm placeholder:text-gray-400 focus:outline-none focus:ring-1 ${validationErrors?.collegeFee
+                              ? 'border-red-500 focus:ring-red-500'
+                              : 'border-gray-400 focus:ring-[#2475aa]'
+                            }`}
+                        />
+                        {validationErrors?.collegeFee && (
+                          <p className="text-red-500 text-sm mt-1">{validationErrors.collegeFee}</p>
+                        )}
+                      </label>
+                    )}
+                  </div>
 
                   <label className="block">
                     <span className="block text-sm font-medium text-gray-800 mb-1">College ID <span className="text-red-500">*</span></span>

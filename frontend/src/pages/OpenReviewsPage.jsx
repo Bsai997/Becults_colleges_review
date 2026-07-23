@@ -99,17 +99,44 @@ export default function OpenReviewsPage() {
 
         {/* Hero heading — matches screenshot */}
         <h1 className="mb-1 text-3xl font-extrabold leading-tight text-slate-900 sm:text-4xl font-sans">
-          Make the <br /><span className="text-[#2475aa] font-sans font-extrabold cd fr ">Right Choice with</span> 
+          Make the <br /><span className="text-[#2475aa] font-sans font-extrabold cd fr ">Right Choice with</span>
         </h1>
-     <h1 className="mb-5 text-3xl font-extrabold leading-tight text-[#D3540D] sm:text-4xl font-sans">
+        <h1 className="mb-5 text-3xl font-extrabold leading-tight text-[#D3540D] sm:text-4xl font-sans">
           Senior Suggestions
         </h1>
 
-        {/* <p className="mb-4 text-sm text-slate-500">
-          {college.name} · {college.location}
-          {college.affiliation ? ` · ${college.affiliation}` : ''}
-        </p> */}
+        <div className="mb-4 font-bold text-slate-500 space-y-1">
+          {/* 1. College Name */}
+          <h1 className="mb-5 text-3xl font-extrabold leading-tight text-[#1e1f20] sm:text-4xl font-sans">
+          {college.name}
+        </h1>
+          {/* 2. Location with Location Icon */}
+          {college.location && (
+            <p className="flex items-center gap-1.5">
+              {/* Map Pin / Location SVG Icon */}
+              <svg
+                className="w-4 h-4 text-slate-500 flex-shrink-0"
+                fill="none"
+                stroke="currentColor"
+                strokeWidth="2"
+                viewBox="0 0 24 24"
+                xmlns="http://www.w3.org/2000/svg"
+              >
+                <path strokeLinecap="round" strokeLinejoin="round" d="M17.657 16.657L13.414 20.9a1.998 1.998 0 01-2.827 0l-4.244-4.243a8 8 0 1111.314 0z" />
+                <path strokeLinecap="round" strokeLinejoin="round" d="M15 11a3 3 0 11-6 0 3 3 0 016 0z" />
+              </svg>
+              <span>{college.location}</span>
+            </p>
+          )}
 
+          {/* 3. Affiliated By (Below Location) */}
+          {/* {college.affiliation && (
+            <p>
+              <span>Affiliated by: </span>
+              {college.affiliation}
+            </p>
+          )} */}
+        </div>
         {/* Branch dropdown — matches "Select Branch" pill in screenshot */}
         <div className="relative mb-6">
           <select

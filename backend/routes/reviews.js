@@ -64,7 +64,7 @@ router.get('/reviews/:collegeId', async (req, res) => {
 // POST /api/reviews - Create a new review
 router.post('/reviews', async (req, res) => {
   try {
-    console.log('POST /reviews - Received body:', req.body);
+    // console.log('POST /reviews - Received body:', req.body);
     
     const {
       college_id,
