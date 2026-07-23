@@ -4,22 +4,45 @@ import { supabase } from '../index.js';
 const router = express.Router();
 
 // GET /api/colleges/top10 - Get top 10 colleges
-router.get('/colleges/top10', async (req, res) => {
+// router.get('/colleges/top10', async (req, res) => {
+//   try {
+//     const { data, error } = await supabase
+//       .from('colleges')
+//       .select('id, instcode, name, location, affiliation') // Dropped created_at to shrink payload
+//       .order('sno', { ascending: true })                  // Forces high-speed index usage
+//       .limit(20);
+
+//     if (error) throw error;
+//     res.json(data);
+//   } catch (error) {
+//     console.error('Error fetching top 10 colleges:', error);
+//     res.status(500).json({ error: error.message });
+//   }
+// });
+router.get('/colleges', async (req, res) => {
   try {
+    // Parse query params with defaults (default: page 1, limit 40)
+    const page = Math.max(1, parseInt(req.query.page, 10) || 1);
+    const limit = Math.max(1, parseInt(req.query.limit, 10) || 40);
+
+    // Calculate zero-indexed offset ranges for Supabase (.range is inclusive)
+    const from = (page - 1) * limit;
+    const to = from + limit - 1;
+
     const { data, error } = await supabase
       .from('colleges')
-      .select('id, instcode, name, location, affiliation') // Dropped created_at to shrink payload
-      .order('sno', { ascending: true })                  // Forces high-speed index usage
-      .limit(250);
+      .select('id, instcode, name, location, affiliation')
+      .order('sno', { ascending: true }) // Uses the idx_colleges_sno_asc index
+      .range(from, to);
 
     if (error) throw error;
+
     res.json(data);
   } catch (error) {
-    console.error('Error fetching top 10 colleges:', error);
+    console.error('Error fetching colleges:', error);
     res.status(500).json({ error: error.message });
   }
 });
-
 
 // GET /api/colleges/search?q= - Search colleges by name
 router.get('/colleges/search', async (req, res) => {

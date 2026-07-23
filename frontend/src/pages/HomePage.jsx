@@ -1,66 +1,214 @@
-import { useState, useEffect, useCallback } from 'react'; // Added useCallback
+// import { useState, useEffect, useCallback } from 'react'; // Added useCallback
+// import api from '../api/axios';
+// import SearchBar from '../components/SearchBar';
+// import CollegeCard from '../components/CollegeCard';
+// import SkeletonLoader from '../components/SkeletonLoader';
+
+// export default function HomePage() {
+//   const [colleges, setColleges] = useState([]);
+//   const [isLoading, setIsLoading] = useState(true);
+//   const [error, setError] = useState(null);
+
+//   // Memoized function prevents unnecessary component re-renders
+//   const fetchTop10Colleges = useCallback(async () => {
+//     try {
+//       setIsLoading(true);
+//       const response = await api.get('/colleges/top10');
+//       setColleges(response.data);
+//       setError(null);
+//     } catch (err) {
+//       console.error('Error fetching colleges:', err);
+//       setError('Please refresh the page to load the colleges.');
+//     } finally {
+//       setIsLoading(false);
+//     }
+//   }, []);
+//   const fetchreviewslength = useCallback(async (collegeId) => {
+//     try {
+//       const response = await api.get(`/colleges/${collegeId}/stats`); 
+//       return response.data.total_reviews;
+//     } catch (err) {
+//       console.error(`Error fetching review count for college ${collegeId}:`, err);
+//       return 0;
+//     }
+//   }, []);
+
+//   useEffect(() => {
+//     fetchTop10Colleges();
+//   }, [fetchTop10Colleges]);
+//   useEffect(() => {
+//     const fetchreviewslengthForColleges = async () => {
+//       const collegesWithReviews = await Promise.all(
+//         colleges.map(async (college) => { 
+//           const total_reviews = await fetchreviewslength(college.id);
+//           return { ...college, total_reviews };
+//         })
+//       );
+//       setColleges(collegesWithReviews);
+//     } 
+//     if (colleges.length > 0) {
+//       fetchreviewslengthForColleges();
+//     }
+//   }, [colleges, fetchreviewslength]);
+
+//   return (
+//     <div className="min-h-screen bg-[#eaf3fb] text-slate-900">
+//       <div className="relative overflow-hidden bg-[linear-gradient(180deg,#f4f8fd_0%,#eaf3fb_100%)] px-4 pt-10 pb-6 md:pt-14 md:pb-8">
+//         <div className="absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top_left,rgba(0,102,204,0.14),transparent_45%),radial-gradient(circle_at_top_right,rgba(243,116,32,0.18),transparent_35%)]" />
+//         <div className="relative mx-auto flex max-w-2xl flex-col items-center text-center">
+//           <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 shadow-sm backdrop-blur">
+//             BECULTS
+//           </div>
+//           <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#1A699F] md:text-6xl"> 
+//             College <span className="text-[#0e0f10] font-sans font-extrabold cd fr "> Reviews</span> 
+//             <span className="block text-slate-800">by <span className="text-[#ef6c20]">College Students</span></span> 
+//           </h1>
+//           <p className="mt-4 max-w-xl text-sm text-slate-600 md:text-base"> 
+//             Search, compare, and open real student reviews in one place. 
+//           </p>
+//         </div>
+//       </div>
+
+//       <div className="px-4 pb-10">
+//         <div className="mx-auto max-w-4xl rounded-[28px] border border-sky-100 bg-white/95 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur md:p-5">
+//           <SearchBar />
+//         </div>
+//       </div>
+
+//       <div className="mx-auto max-w-4xl px-4 pb-12 md:pb-16">
+//         <div className="mb-5 flex items-end justify-between gap-3">
+//           <div>
+//             <p className="mt-1 text-sm text-slate-600">The most reviewed colleges on the platform.</p>
+//           </div>
+//           <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
+//             {colleges.length} listed
+//           </div>
+//         </div>
+
+//         {isLoading ? (
+//           <SkeletonLoader />
+//         ) : error ? (
+//           <div className="rounded-2xl border border-red-200 bg-red-50 px-4 py-3 text-red-700 shadow-sm">
+//             {error}
+//           </div>
+//         ) : colleges.length === 0 ? (
+//           <div className="rounded-2xl border border-sky-200 bg-sky-50 px-4 py-3 text-sky-700 shadow-sm">
+//             No colleges found. Be the first to add a review!
+//           </div>
+//         ) : (
+//           <div className="space-y-4">
+//             {colleges.map((college, index) => (
+//               <CollegeCard 
+//                 key={college.id} 
+//                 rank={index + 1} 
+//                 id={college.id} 
+//                 name={college.name} 
+//                 location={college.location} 
+//                 total_reviews={college.total_reviews}
+//               />
+//             ))}
+//           </div>
+//         )}
+//       </div>
+//     </div>
+//   );
+// }
+ import { useState, useEffect, useCallback } from 'react';
 import api from '../api/axios';
 import SearchBar from '../components/SearchBar';
 import CollegeCard from '../components/CollegeCard';
 import SkeletonLoader from '../components/SkeletonLoader';
 
+const PAGE_LIMIT = 40;
+
 export default function HomePage() {
   const [colleges, setColleges] = useState([]);
-  const [isLoading, setIsLoading] = useState(true);
+  const [page, setPage] = useState(1);
+  const [isLoading, setIsLoading] = useState(true);         // Initial page load
+  const [isMoreLoading, setIsMoreLoading] = useState(false); // "Show More" button load
+  const [hasMore, setHasMore] = useState(true);              // Tracks if more items exist
   const [error, setError] = useState(null);
 
-  // Memoized function prevents unnecessary component re-renders
-  const fetchTop10Colleges = useCallback(async () => {
-    try {
+  // Helper function to fetch stats for a batch of colleges
+  const fetchReviewStatsForColleges = async (collegeList) => {
+    return await Promise.all(
+      collegeList.map(async (college) => {
+        try {
+          const response = await api.get(`/colleges/${college.id}/stats`);
+          return { ...college, total_reviews: response.data.total_reviews };
+        } catch (err) {
+          console.error(`Error fetching review count for college ${college.id}:`, err);
+          return { ...college, total_reviews: 0 };
+        }
+      })
+    );
+  };
+
+  // Main fetch function with pagination
+  const fetchColleges = useCallback(async (pageNum) => {
+    if (pageNum === 1) {
       setIsLoading(true);
-      const response = await api.get('/colleges/top10');
-      setColleges(response.data);
-      setError(null);
+    } else {
+      setIsMoreLoading(true);
+    }
+    setError(null);
+
+    try {
+      // Pass pagination query parameters to backend endpoint
+      const response = await api.get('/colleges', {
+        params: { page: pageNum, limit: PAGE_LIMIT }
+      });
+
+      // Handle both array response or object wrapper response (e.g., { colleges: [] })
+      const rawColleges = Array.isArray(response.data) 
+        ? response.data 
+        : response.data.colleges || [];
+
+      if (rawColleges.length < PAGE_LIMIT) {
+        setHasMore(false); // Reached end of data
+      } else {
+        setHasMore(true);
+      }
+
+      // Fetch review counts for this batch before state update
+      const collegesWithStats = await fetchReviewStatsForColleges(rawColleges);
+
+      // Append new colleges if page > 1, else set directly
+      setColleges((prev) => 
+        pageNum === 1 ? collegesWithStats : [...prev, ...collegesWithStats]
+      );
     } catch (err) {
       console.error('Error fetching colleges:', err);
       setError('Please refresh the page to load the colleges.');
     } finally {
       setIsLoading(false);
-    }
-  }, []);
-  const fetchreviewslength = useCallback(async (collegeId) => {
-    try {
-      const response = await api.get(`/colleges/${collegeId}/stats`); 
-      return response.data.total_reviews;
-    } catch (err) {
-      console.error(`Error fetching review count for college ${collegeId}:`, err);
-      return 0;
+      setIsMoreLoading(false);
     }
   }, []);
 
+  // Fetch initial 40 colleges on component mount
   useEffect(() => {
-    fetchTop10Colleges();
-  }, [fetchTop10Colleges]);
-  useEffect(() => {
-    const fetchreviewslengthForColleges = async () => {
-      const collegesWithReviews = await Promise.all(
-        colleges.map(async (college) => { 
-          const total_reviews = await fetchreviewslength(college.id);
-          return { ...college, total_reviews };
-        })
-      );
-      setColleges(collegesWithReviews);
-    } 
-    if (colleges.length > 0) {
-      fetchreviewslengthForColleges();
-    }
-  }, [colleges, fetchreviewslength]);
+    fetchColleges(1);
+  }, [fetchColleges]);
+
+  // Handler for "Show More" button
+  const handleShowMore = () => {
+    const nextPage = page + 1;
+    setPage(nextPage);
+    fetchColleges(nextPage);
+  };
 
   return (
     <div className="min-h-screen bg-[#eaf3fb] text-slate-900">
+      {/* Header Banner */}
       <div className="relative overflow-hidden bg-[linear-gradient(180deg,#f4f8fd_0%,#eaf3fb_100%)] px-4 pt-10 pb-6 md:pt-14 md:pb-8">
         <div className="absolute inset-x-0 top-0 h-36 bg-[radial-gradient(circle_at_top_left,rgba(0,102,204,0.14),transparent_45%),radial-gradient(circle_at_top_right,rgba(243,116,32,0.18),transparent_35%)]" />
         <div className="relative mx-auto flex max-w-2xl flex-col items-center text-center">
           <div className="inline-flex items-center gap-2 rounded-full border border-sky-200 bg-white/80 px-3 py-1 text-xs font-semibold uppercase tracking-[0.24em] text-sky-700 shadow-sm backdrop-blur">
             BECULTS
           </div>
-          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#1A699F] md:text-6xl"> 
-            College <span className="text-[#0e0f10] font-sans font-extrabold cd fr "> Reviews</span> 
+          <h1 className="mt-4 text-4xl font-extrabold leading-tight tracking-tight text-[#1A699F] md:text-6xl">
+            College <span className="text-[#0e0f10] font-sans font-extrabold"> Reviews</span> 
             <span className="block text-slate-800">by <span className="text-[#ef6c20]">College Students</span></span> 
           </h1>
           <p className="mt-4 max-w-xl text-sm text-slate-600 md:text-base"> 
@@ -69,19 +217,21 @@ export default function HomePage() {
         </div>
       </div>
 
+      {/* Search Bar */}
       <div className="px-4 pb-10">
         <div className="mx-auto max-w-4xl rounded-[28px] border border-sky-100 bg-white/95 p-4 shadow-[0_18px_45px_rgba(15,23,42,0.08)] backdrop-blur md:p-5">
           <SearchBar />
         </div>
       </div>
 
+      {/* College List & Pagination */}
       <div className="mx-auto max-w-4xl px-4 pb-12 md:pb-16">
         <div className="mb-5 flex items-end justify-between gap-3">
           <div>
             <p className="mt-1 text-sm text-slate-600">The most reviewed colleges on the platform.</p>
           </div>
           <div className="rounded-full border border-slate-200 bg-white px-3 py-1 text-xs font-medium text-slate-600 shadow-sm">
-            {colleges.length} listed
+            {colleges.length} loaded
           </div>
         </div>
 
@@ -99,7 +249,7 @@ export default function HomePage() {
           <div className="space-y-4">
             {colleges.map((college, index) => (
               <CollegeCard 
-                key={college.id} 
+                key={`${college.id}-${index}`} 
                 rank={index + 1} 
                 id={college.id} 
                 name={college.name} 
@@ -107,9 +257,31 @@ export default function HomePage() {
                 total_reviews={college.total_reviews}
               />
             ))}
+
+            {/* Show More Button */}
+            {hasMore && (
+              <div className="pt-6 text-center">
+                <button
+                  type="button"
+                  onClick={handleShowMore}
+                  disabled={isMoreLoading}
+                  className="inline-flex items-center justify-center gap-2 rounded-full bg-[#1A699F] px-8 py-3 text-sm font-semibold text-white shadow-md transition-all hover:bg-[#15537f] hover:shadow-lg disabled:opacity-60"
+                >
+                  {isMoreLoading ? (
+                    <>
+                      <span className="h-4 w-4 animate-spin rounded-full border-2 border-white border-t-transparent" />
+                      Loading more...
+                    </>
+                  ) : (
+                    'Show More'
+                  )}
+                </button>
+              </div>
+            )}
           </div>
         )}
       </div>
     </div>
   );
 }
+ 
