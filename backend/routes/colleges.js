@@ -10,7 +10,7 @@ router.get('/colleges/top10', async (req, res) => {
       .from('colleges')
       .select('id, instcode, name, location, affiliation') // Dropped created_at to shrink payload
       .order('sno', { ascending: true })                  // Forces high-speed index usage
-      .limit(94);
+      .limit(250);
 
     if (error) throw error;
     res.json(data);
