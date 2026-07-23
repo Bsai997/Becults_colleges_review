@@ -23,10 +23,33 @@ export default function HomePage() {
       setIsLoading(false);
     }
   }, []);
+  const fetchreviewslength = useCallback(async (collegeId) => {
+    try {
+      const response = await api.get(`/colleges/${collegeId}/stats`); 
+      return response.data.total_reviews;
+    } catch (err) {
+      console.error(`Error fetching review count for college ${collegeId}:`, err);
+      return 0;
+    }
+  }, []);
 
   useEffect(() => {
     fetchTop10Colleges();
   }, [fetchTop10Colleges]);
+  useEffect(() => {
+    const fetchreviewslengthForColleges = async () => {
+      const collegesWithReviews = await Promise.all(
+        colleges.map(async (college) => { 
+          const total_reviews = await fetchreviewslength(college.id);
+          return { ...college, total_reviews };
+        })
+      );
+      setColleges(collegesWithReviews);
+    } 
+    if (colleges.length > 0) {
+      fetchreviewslengthForColleges();
+    }
+  }, [colleges, fetchreviewslength]);
 
   return (
     <div className="min-h-screen bg-[#eaf3fb] text-slate-900">
@@ -81,6 +104,7 @@ export default function HomePage() {
                 id={college.id} 
                 name={college.name} 
                 location={college.location} 
+                total_reviews={college.total_reviews}
               />
             ))}
           </div>
